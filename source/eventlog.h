@@ -35,9 +35,31 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef EVENTLOG_H_
 #define EVENTLOG_H_
 
+#include <qt4/QtGui/QWidget>
+#include <qt4/QtGui/QTableWidget>
+#include <qt4/QtGui/QToolBar>
+#include <dsb/event.h>
+
+class QAction;
+class EventGenerator;
+
 class EventLogger : public QWidget
 {
+	Q_OBJECT
 
+public:
+	EventLogger();
+	~EventLogger();
+
+	void addEvent(Event_t *evt);
+
+private:
+	QToolBar *m_bar;
+	QTableWidget *m_table;
+	EventGenerator *m_gen;
+
+public slots:
+	void toolclick(QAction *);
 };
 
 #endif /* EVENTLOG_H_ */

@@ -33,8 +33,87 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 
+#include "eventlog.h"
+#include "eventgen.h"
+#include <qt4/QtGui/QHBoxLayout>
+#include <qt4/QtGui/QVBoxLayout>
+#include <qt4/QtGui/QAction>
+#include <iostream>
 
 
+EventLogger::EventLogger()
+	: QWidget()
+{
+	QVBoxLayout *mainlayout = new QVBoxLayout();
+	setLayout(mainlayout);
 
+	m_bar = new QToolBar();
+	m_bar->addAction(QIcon("./data/icons/email.png"),"Send");
+	m_bar->addAction(QIcon("./data/icons/bin.png"),"Clear");
+	mainlayout->addWidget(m_bar);
 
+	m_table = new QTableWidget();
+	m_table->setColumnCount(5);
+	QStringList headers;
+	headers.append("");
+	headers.append("Type");
+	headers.append("Destination");
+	headers.append("Result");
+	headers.append("Data");
+	m_table->setHorizontalHeaderLabels(headers);
+	mainlayout->addWidget(m_table);
 
+	m_gen = new EventGenerator();
+
+	setWindowTitle("Event Logger");
+	resize(600,400);
+	show();
+
+	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
+}
+
+EventLogger::~EventLogger()
+{
+
+}
+
+void EventLogger::addEvent(Event_t *evt)
+{
+	QTableWidgetItem *item;
+	int row = m_table->rowCount();
+	m_table->setRowCount(row+1);
+
+	item = new QTableWidgetItem(QIcon("./data/icons/email_go.png"),"");
+	m_table->setItem(row,0,item);
+
+	switch(evt->type)
+	{
+	case EVENT_DEFINE:	item = new QTableWidgetItem("DEFINE");
+						break;
+	case EVENT_GET:		item = new QTableWidgetItem("GET");
+						break;
+	case EVENT_NOTIFY:	item = new QTableWidgetItem("NOTIFY");
+						break;
+	case EVENT_DEP:		item = new QTableWidgetItem("DEP");
+						break;
+	default:			item = new QTableWidgetItem("UNKNOWN");
+						break;
+	}
+	m_table->setItem(row,1,item);
+
+	char buf[100];
+	dsb_nid_toStr(&(evt->d1),buf,100);
+	int pos = strlen(buf);
+	buf[pos++] = ',';
+	dsb_nid_toStr(&(evt->d2),&(buf[pos]),100-pos);
+	item = new QTableWidgetItem(buf);
+	m_table->setItem(row,2,item);
+}
+
+void EventLogger::toolclick(QAction *a)
+{
+	if (a->text() == "Send")
+	{
+		m_gen->show();
+	}
+}

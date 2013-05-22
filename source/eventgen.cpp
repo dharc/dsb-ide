@@ -39,6 +39,12 @@ either expressed or implied, of the FreeBSD Project.
 #include <iostream>
 #include <dsb/nid.h>
 #include <dsb/errors.h>
+#include <dsb/common.h>
+
+extern "C"
+{
+int dsb_send(struct Event *,int);
+}
 
 EventGenerator::EventGenerator()
 	: QWidget()
@@ -75,7 +81,7 @@ EventGenerator::EventGenerator()
 	m_dest1->setAutoFillBackground(true);
 	destlayout->addWidget(m_dest1);
 	m_dest1vl = new QLabel();
-	QPixmap tick("./data/icons/greentick.png");
+	QPixmap tick("./data/icons/tick.png");
 	m_dest1vl->setPixmap(tick);
 	destlayout->addWidget(m_dest1vl);
 	m_dest2 = new QLineEdit();
@@ -125,12 +131,14 @@ EventGenerator::EventGenerator()
 
 	m_send = new QPushButton("Send");
 	buttonlayout->addWidget(m_send);
-	m_cancel = new QPushButton("Cancel");
+	m_cancel = new QPushButton("Done");
 	buttonlayout->addWidget(m_cancel);
+
+	m_event.type = EVENT_DEFINE;
 
 	setWindowTitle("Event Generator");
 	//resize(400,400);
-	show();
+	//show();
 
 	connect(m_type, SIGNAL(currentIndexChanged(int)), this, SLOT(typechanged(int)));
 	connect(m_dest1, SIGNAL(textChanged(const QString &)), this, SLOT(dest1changed(const QString &)));
@@ -149,19 +157,19 @@ void EventGenerator::dest1changed(const QString &txt)
 {
 	if (txt.length() == 0)
 	{
-		QPixmap tick("./data/icons/greentick.png");
+		QPixmap tick("./data/icons/tick.png");
 		m_dest1vl->setPixmap(tick);
 		return;
 	}
 
-	if (dsb_nid_fromStr(txt.toAscii().constData(),&(m_event.d1)) != SUCCESS)
+	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.d1)) != SUCCESS)
 	{
-		QPixmap cross("./data/icons/redcross.png");
+		QPixmap cross("./data/icons/cross.png");
 		m_dest1vl->setPixmap(cross);
 	}
 	else
 	{
-		QPixmap tick("./data/icons/greentick.png");
+		QPixmap tick("./data/icons/tick.png");
 		m_dest1vl->setPixmap(tick);
 	}
 }
@@ -170,19 +178,19 @@ void EventGenerator::dest2changed(const QString &txt)
 {
 	if (txt.length() == 0)
 	{
-		QPixmap tick("./data/icons/greentick.png");
+		QPixmap tick("./data/icons/tick.png");
 		m_dest2vl->setPixmap(tick);
 		return;
 	}
 
-	if (dsb_nid_fromStr(txt.toAscii().constData(),&(m_event.d2)) != SUCCESS)
+	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.d2)) != SUCCESS)
 	{
-		QPixmap cross("./data/icons/redcross.png");
+		QPixmap cross("./data/icons/cross.png");
 		m_dest2vl->setPixmap(cross);
 	}
 	else
 	{
-		QPixmap tick("./data/icons/greentick.png");
+		QPixmap tick("./data/icons/tick.png");
 		m_dest2vl->setPixmap(tick);
 	}
 }
@@ -191,19 +199,19 @@ void EventGenerator::defchanged(const QString &txt)
 {
 	if (txt.length() == 0)
 	{
-		QPixmap tick("./data/icons/greentick.png");
+		QPixmap tick("./data/icons/tick.png");
 		m_defvl->setPixmap(tick);
 		return;
 	}
 
-	if (dsb_nid_fromStr(txt.toAscii().constData(),&(m_event.def)) != SUCCESS)
+	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.def)) != SUCCESS)
 	{
-		QPixmap cross("./data/icons/redcross.png");
+		QPixmap cross("./data/icons/cross.png");
 		m_defvl->setPixmap(cross);
 	}
 	else
 	{
-		QPixmap tick("./data/icons/greentick.png");
+		QPixmap tick("./data/icons/tick.png");
 		m_defvl->setPixmap(tick);
 	}
 }
@@ -211,6 +219,7 @@ void EventGenerator::defchanged(const QString &txt)
 void EventGenerator::sendclicked()
 {
 	//Actually send the event here.
+	dsb_send(&m_event,1);
 }
 
 void EventGenerator::cancelclicked()

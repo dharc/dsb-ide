@@ -33,13 +33,31 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include <qt4/Qt/QtGui>
-#include "eventgen.h"
+#include "eventlog.h"
+#include <dsb/event.h>
+#include <dsb/wrap.h>
+
+EventLogger *evtlogger = 0;
+
+extern "C"
+{
+int dsb_send(Event_t *evt, int async)
+{
+	evtlogger->addEvent(evt);
+	return 0;
+}
+}
 
 int main(int argc, char *argv[])
 {
 	QApplication qtapp(argc,argv);
 
-	new EventGenerator();
+	evtlogger = new EventLogger();
+
+	NID_t a;
+	dsb_nid(NID_INTEGER,2,&a);
+	dsb_get(&a,&a,&a);
+
 
 	QApplication::exec();
 

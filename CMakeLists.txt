@@ -22,8 +22,8 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-D_DEBUG -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
 
-set(DSBIDESRC source/main.cpp source/eventgen.cpp)
-set(DSBIDEHEADERS source/eventgen.h)
+set(DSBIDESRC source/main.cpp source/eventgen.cpp source/eventlog.cpp)
+set(DSBIDEHEADERS source/eventgen.h source/eventlog.h)
 
 # configure_file( ${CMAKE_SOURCE_DIR}/common/include/dsb/config.h.in ${CMAKE_BINARY_DIR}/config.h )
 
