@@ -50,6 +50,7 @@ EventLogger::EventLogger()
 	m_bar = new QToolBar();
 	m_bar->addAction(QIcon("./data/icons/email.png"),"Send");
 	m_bar->addAction(QIcon("./data/icons/bin.png"),"Clear");
+	m_bar->addAction(QIcon("./data/icons/control_pause_blue.png"),"Pause");
 	mainlayout->addWidget(m_bar);
 
 	m_table = new QTableWidget();
