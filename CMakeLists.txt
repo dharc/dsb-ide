@@ -24,14 +24,16 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
 
 set(DSBIDESRC source/main.cpp source/eventgen.cpp source/eventlog.cpp)
 set(DSBIDEHEADERS source/eventgen.h source/eventlog.h)
+set(DSBIDERCCS data/icons.qrc)
 
 # configure_file( ${CMAKE_SOURCE_DIR}/common/include/dsb/config.h.in ${CMAKE_BINARY_DIR}/config.h )
 
 QT4_WRAP_CPP(DSBIDEHEADERSMOC ${DSBIDEHEADERS})
+QT4_ADD_RESOURCES(DSBIDERCCSRCS ${DSBIDERCCS})
 
 INCLUDE(${QT_USE_FILE})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 
-add_executable(dsb-ide ${DSBIDESRC} ${DSBIDEHEADERSMOC})
+add_executable(dsb-ide ${DSBIDESRC} ${DSBIDEHEADERSMOC} ${DSBIDERCCSRCS})
 target_link_libraries(dsb-ide dsbcommon ${QT_LIBRARIES})
 

@@ -81,7 +81,7 @@ EventGenerator::EventGenerator()
 	m_dest1->setAutoFillBackground(true);
 	destlayout->addWidget(m_dest1);
 	m_dest1vl = new QLabel();
-	QPixmap tick("./data/icons/tick.png");
+	QPixmap tick(":/icons/tick.png");
 	m_dest1vl->setPixmap(tick);
 	destlayout->addWidget(m_dest1vl);
 	m_dest2 = new QLineEdit();
@@ -157,19 +157,19 @@ void EventGenerator::dest1changed(const QString &txt)
 {
 	if (txt.length() == 0)
 	{
-		QPixmap tick("./data/icons/tick.png");
+		QPixmap tick(":/icons/tick.png");
 		m_dest1vl->setPixmap(tick);
 		return;
 	}
 
 	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.d1)) != SUCCESS)
 	{
-		QPixmap cross("./data/icons/cross.png");
+		QPixmap cross(":/icons/cross.png");
 		m_dest1vl->setPixmap(cross);
 	}
 	else
 	{
-		QPixmap tick("./data/icons/tick.png");
+		QPixmap tick(":/icons/tick.png");
 		m_dest1vl->setPixmap(tick);
 	}
 }
@@ -178,19 +178,19 @@ void EventGenerator::dest2changed(const QString &txt)
 {
 	if (txt.length() == 0)
 	{
-		QPixmap tick("./data/icons/tick.png");
+		QPixmap tick(":/icons/tick.png");
 		m_dest2vl->setPixmap(tick);
 		return;
 	}
 
 	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.d2)) != SUCCESS)
 	{
-		QPixmap cross("./data/icons/cross.png");
+		QPixmap cross(":/icons/cross.png");
 		m_dest2vl->setPixmap(cross);
 	}
 	else
 	{
-		QPixmap tick("./data/icons/tick.png");
+		QPixmap tick(":/icons/tick.png");
 		m_dest2vl->setPixmap(tick);
 	}
 }
@@ -199,19 +199,19 @@ void EventGenerator::defchanged(const QString &txt)
 {
 	if (txt.length() == 0)
 	{
-		QPixmap tick("./data/icons/tick.png");
+		QPixmap tick(":/icons/tick.png");
 		m_defvl->setPixmap(tick);
 		return;
 	}
 
 	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.def)) != SUCCESS)
 	{
-		QPixmap cross("./data/icons/cross.png");
+		QPixmap cross(":/icons/cross.png");
 		m_defvl->setPixmap(cross);
 	}
 	else
 	{
-		QPixmap tick("./data/icons/tick.png");
+		QPixmap tick(":/icons/tick.png");
 		m_defvl->setPixmap(tick);
 	}
 }

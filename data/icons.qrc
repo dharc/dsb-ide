@@ -1,0 +1,11 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource>
+		<file>icons/bin.png</file>
+		<file>icons/control_pause_blue.png</file>
+		<file>icons/control_play_blue.png</file>
+		<file>icons/cross.png</file>
+		<file>icons/tick.png</file>
+		<file>icons/email.png</file>
+		<file>icons/email_go.png</file>
+	</qresource>
+</RCC>

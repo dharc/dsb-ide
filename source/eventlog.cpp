@@ -48,9 +48,9 @@ EventLogger::EventLogger()
 	setLayout(mainlayout);
 
 	m_bar = new QToolBar();
-	m_bar->addAction(QIcon("./data/icons/email.png"),"Send");
-	m_bar->addAction(QIcon("./data/icons/bin.png"),"Clear");
-	m_bar->addAction(QIcon("./data/icons/control_pause_blue.png"),"Pause");
+	m_bar->addAction(QIcon(":/icons/email.png"),"Send");
+	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
+	m_bar->addAction(QIcon(":/icons/control_pause_blue.png"),"Pause");
 	mainlayout->addWidget(m_bar);
 
 	m_table = new QTableWidget();
@@ -84,7 +84,7 @@ void EventLogger::addEvent(Event_t *evt)
 	int row = m_table->rowCount();
 	m_table->setRowCount(row+1);
 
-	item = new QTableWidgetItem(QIcon("./data/icons/email_go.png"),"");
+	item = new QTableWidgetItem(QIcon(":/icons/email_go.png"),"");
 	m_table->setItem(row,0,item);
 
 	switch(evt->type)
