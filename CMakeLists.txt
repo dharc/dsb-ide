@@ -4,6 +4,8 @@ FIND_PACKAGE(Qt4 REQUIRED)
 
 # Need to include staged files and libs
 include_directories(${PROJECT_SOURCE_DIR}/source)
+include_directories(/srv/stage/include)
+link_directories(/srv/stage/lib)
 
 set(dsbide_VERSION_MAJOR "0")
 set(dsbide_VERSION_MINOR "1")
