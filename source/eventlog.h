@@ -52,6 +52,7 @@ public:
 	~EventLogger();
 
 	void addEvent(Event_t *evt);
+	void updateEvent(int id, NID_t *res);
 
 private:
 	QToolBar *m_bar;
@@ -60,6 +61,7 @@ private:
 
 public slots:
 	void toolclick(QAction *);
+	void netpoll();
 };
 
 #endif /* EVENTLOG_H_ */

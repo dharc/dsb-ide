@@ -36,14 +36,48 @@ either expressed or implied, of the FreeBSD Project.
 #include "eventlog.h"
 #include <dsb/event.h>
 #include <dsb/wrap.h>
+#include <dsb/net.h>
+#include <dsb/net_protocol.h>
+#include <dsb/nid.h>
+#include <iostream>
 
 EventLogger *evtlogger = 0;
+int hostsock = 0;
+
+int net_msg_result(int sock, void *data)
+{
+	struct DSBNetEventResult *res = (struct DSBNetEventResult*)data;
+	evtlogger->updateEvent(res->id, &(res->res));
+	return 0;
+}
 
 extern "C"
 {
 int dsb_send(Event_t *evt, int async)
 {
+	int count = 0;
+	int ix;
+	//struct DSBNetEventSend msg;
+
+	//Record the event.
 	evtlogger->addEvent(evt);
+
+	//msg.evt = *evt;
+	//Actually send the event
+	dsb_net_send(hostsock, DSBNET_SENDEVENT, evt);
+
+	//Block if we need a response.
+	if ((async == 0) && (evt->type == EVENT_GET))
+	{
+		while (((evt->flags & EVTFLAG_DONE) == 0) && count < 10)
+		{
+			dsb_net_poll(100);
+			count++;
+		}
+
+		//TODO Report a timeout failure
+	}
+
 	return 0;
 }
 }
@@ -52,6 +86,9 @@ int main(int argc, char *argv[])
 {
 	QApplication qtapp(argc,argv);
 
+	dsb_net_init();
+	dsb_net_callback(DSBNET_EVENTRESULT,net_msg_result);
+	hostsock = dsb_net_connect("localhost");
 	evtlogger = new EventLogger();
 
 	NID_t a;
@@ -60,6 +97,8 @@ int main(int argc, char *argv[])
 
 
 	QApplication::exec();
+
+	dsb_net_final();
 
 	return 0;
 }

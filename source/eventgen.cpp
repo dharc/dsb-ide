@@ -135,6 +135,7 @@ EventGenerator::EventGenerator()
 	buttonlayout->addWidget(m_cancel);
 
 	m_event.type = EVENT_DEFINE;
+	m_event.eval = 0;
 
 	setWindowTitle("Event Generator");
 	//resize(400,400);

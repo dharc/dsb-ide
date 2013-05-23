@@ -35,9 +35,11 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "eventlog.h"
 #include "eventgen.h"
+#include <dsb/net.h>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
 #include <qt4/QtGui/QAction>
+#include <qt4/QtCore/QTimer>
 #include <iostream>
 
 
@@ -71,9 +73,18 @@ EventLogger::EventLogger()
 	show();
 
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
+
+	QTimer *nettimer = new QTimer(this);
+	connect(nettimer, SIGNAL(timeout()), this, SLOT(netpoll()));
+	nettimer->start(20);
 }
 
 EventLogger::~EventLogger()
+{
+
+}
+
+void EventLogger::updateEvent(int id, NID_t *res)
 {
 
 }
@@ -109,6 +120,16 @@ void EventLogger::addEvent(Event_t *evt)
 	dsb_nid_toStr(&(evt->d2),&(buf[pos]),100-pos);
 	item = new QTableWidgetItem(buf);
 	m_table->setItem(row,2,item);
+
+	//Save the event somewhere if it is a GET event that needs updating
+	if (evt->type == EVENT_GET)
+	{
+		//struct EventRecord *erec = new EventRecord;
+		//erec->evt = evt;
+		//erec->item = row;
+		//s_syncget.push_back(erec);
+		//evt->eval = s_syncget.size();
+	}
 }
 
 void EventLogger::toolclick(QAction *a)
@@ -117,4 +138,9 @@ void EventLogger::toolclick(QAction *a)
 	{
 		m_gen->show();
 	}
+}
+
+void EventLogger::netpoll()
+{
+	dsb_net_poll(0);
 }
