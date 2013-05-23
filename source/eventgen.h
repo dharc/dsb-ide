@@ -79,6 +79,8 @@ public slots:
 	void dest1changed(const QString &);
 	void dest2changed(const QString &);
 	void defchanged(const QString &);
+	void dep1changed(const QString &);
+	void dep2changed(const QString &);
 	void sendclicked();
 	void cancelclicked();
 	void typechanged(int index);

@@ -69,10 +69,10 @@ EventGenerator::EventGenerator()
 	//Type combobox
 	m_type = new QComboBox(this);
 	typelayout->addWidget(m_type);
-	m_type->addItem("DEFINE");
-	m_type->addItem("NOTIFY");
-	m_type->addItem("GET");
-	m_type->addItem("DEP");
+	m_type->addItem("Edit");
+	m_type->addItem("Notify");
+	m_type->addItem("Get");
+	m_type->addItem("Link");
 
 	//NIDs for Event destinations
 	m_destlabel = new QLabel("Destination:");
@@ -145,6 +145,8 @@ EventGenerator::EventGenerator()
 	connect(m_dest1, SIGNAL(textChanged(const QString &)), this, SLOT(dest1changed(const QString &)));
 	connect(m_dest2, SIGNAL(textChanged(const QString &)), this, SLOT(dest2changed(const QString &)));
 	connect(m_def, SIGNAL(textChanged(const QString &)), this, SLOT(defchanged(const QString &)));
+	connect(m_dep1, SIGNAL(textChanged(const QString &)), this, SLOT(dep1changed(const QString &)));
+	connect(m_dep2, SIGNAL(textChanged(const QString &)), this, SLOT(dep2changed(const QString &)));
 	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
 	connect(m_send, SIGNAL(clicked()), this, SLOT(sendclicked()));
 }
@@ -214,6 +216,48 @@ void EventGenerator::defchanged(const QString &txt)
 	{
 		QPixmap tick(":/icons/tick.png");
 		m_defvl->setPixmap(tick);
+	}
+}
+
+void EventGenerator::dep1changed(const QString &txt)
+{
+	if (txt.length() == 0)
+	{
+		QPixmap tick(":/icons/tick.png");
+		m_dep1vl->setPixmap(tick);
+		return;
+	}
+
+	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.dep1)) != SUCCESS)
+	{
+		QPixmap cross(":/icons/cross.png");
+		m_dep1vl->setPixmap(cross);
+	}
+	else
+	{
+		QPixmap tick(":/icons/tick.png");
+		m_dep1vl->setPixmap(tick);
+	}
+}
+
+void EventGenerator::dep2changed(const QString &txt)
+{
+	if (txt.length() == 0)
+	{
+		QPixmap tick(":/icons/tick.png");
+		m_dep2vl->setPixmap(tick);
+		return;
+	}
+
+	if (dsb_nid_fromStr((const char*)txt.toAscii().constData(),&(m_event.dep2)) != SUCCESS)
+	{
+		QPixmap cross(":/icons/cross.png");
+		m_dep2vl->setPixmap(cross);
+	}
+	else
+	{
+		QPixmap tick(":/icons/tick.png");
+		m_dep2vl->setPixmap(tick);
 	}
 }
 

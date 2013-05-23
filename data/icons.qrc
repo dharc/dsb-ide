@@ -14,5 +14,6 @@
 		<file>icons/chart_line_error.png</file>
 		<file>icons/chart_line_link.png</file>
 		<file>icons/add.png</file>
+		<file>icons/hourglass.png</file>
 	</qresource>
 </RCC>

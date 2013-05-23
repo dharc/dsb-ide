@@ -41,6 +41,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QAction>
 #include <qt4/QtCore/QTimer>
 #include <iostream>
+#include <stdio.h>
 
 
 EventLogger::EventLogger()
@@ -56,14 +57,14 @@ EventLogger::EventLogger()
 	mainlayout->addWidget(m_bar);
 
 	m_table = new QTableWidget();
-	m_table->setColumnCount(4);
+	m_table->setColumnCount(3);
 	m_table->setShowGrid(false);
 	QStringList headers;
 	headers.append("");
 	headers.append("Destination");
-	headers.append("Result");
 	headers.append("Data");
 	m_table->setHorizontalHeaderLabels(headers);
+	m_table->setColumnWidth(2, 300);
 	mainlayout->addWidget(m_table);
 
 	m_gen = new EventGenerator();
@@ -92,6 +93,8 @@ void EventLogger::updateEvent(int id, NID_t *res)
 void EventLogger::addEvent(Event_t *evt)
 {
 	QTableWidgetItem *item;
+	char buf[100];
+	int pos;
 	int row = m_table->rowCount();
 	m_table->setRowCount(row+1);
 
@@ -102,24 +105,38 @@ void EventLogger::addEvent(Event_t *evt)
 	{
 	case EVENT_DEFINE:	item = new QTableWidgetItem(QIcon(":/icons/chart_line_edit.png"),"Edit");
 						m_table->setItem(row,0,item);
+						dsb_nid_toStr(&(evt->def),buf,100);
+						pos = strlen(buf);
+						sprintf(&(buf[pos])," (%d)", evt->eval);
+						item = new QTableWidgetItem(buf);
+						m_table->setItem(row,2,item);
 						break;
 	case EVENT_GET:		item = new QTableWidgetItem(QIcon(":/icons/chart_line.png"),"Get");
 						m_table->setItem(row,0,item);
+						item = new QTableWidgetItem(QIcon(":/icons/hourglass.png"),"waiting...");
+						m_table->setItem(row,2,item);
 						break;
 	case EVENT_NOTIFY:	item = new QTableWidgetItem(QIcon(":/icons/chart_line_error.png"),"Notify");
 						m_table->setItem(row,0,item);
 						break;
 	case EVENT_DEP:		item = new QTableWidgetItem(QIcon(":/icons/chart_line_link.png"),"Link");
 						m_table->setItem(row,0,item);
+						dsb_nid_toStr(&(evt->dep1),buf,100);
+						pos = strlen(buf);
+						buf[pos++] = ',';
+						buf[pos++] = ' ';
+						dsb_nid_toStr(&(evt->dep2),&(buf[pos]),100-pos);
+						item = new QTableWidgetItem(buf);
+						m_table->setItem(row,2,item);
 						break;
 	default:			item = new QTableWidgetItem("Unknown");
 						m_table->setItem(row,0,item);
 						break;
 	}
 
-	char buf[100];
+
 	dsb_nid_toStr(&(evt->d1),buf,100);
-	int pos = strlen(buf);
+	pos = strlen(buf);
 	buf[pos++] = '\n';
 	dsb_nid_toStr(&(evt->d2),&(buf[pos]),100-pos);
 	item = new QTableWidgetItem(buf);
