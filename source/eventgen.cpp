@@ -47,7 +47,7 @@ int dsb_send(struct Event *,int);
 }
 
 EventGenerator::EventGenerator()
-	: QWidget()
+	: QWidget(0, Qt::Dialog)
 {
 	QVBoxLayout *mainlayout = new QVBoxLayout();
 	QHBoxLayout *typelayout = new QHBoxLayout();

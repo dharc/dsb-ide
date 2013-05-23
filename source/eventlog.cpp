@@ -50,16 +50,16 @@ EventLogger::EventLogger()
 	setLayout(mainlayout);
 
 	m_bar = new QToolBar();
-	m_bar->addAction(QIcon(":/icons/email.png"),"Send");
+	m_bar->addAction(QIcon(":/icons/add.png"),"Send");
 	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
 	m_bar->addAction(QIcon(":/icons/control_pause_blue.png"),"Pause");
 	mainlayout->addWidget(m_bar);
 
 	m_table = new QTableWidget();
-	m_table->setColumnCount(5);
+	m_table->setColumnCount(4);
+	m_table->setShowGrid(false);
 	QStringList headers;
 	headers.append("");
-	headers.append("Type");
 	headers.append("Destination");
 	headers.append("Result");
 	headers.append("Data");
@@ -95,31 +95,35 @@ void EventLogger::addEvent(Event_t *evt)
 	int row = m_table->rowCount();
 	m_table->setRowCount(row+1);
 
-	item = new QTableWidgetItem(QIcon(":/icons/email_go.png"),"");
-	m_table->setItem(row,0,item);
+	//item = new QTableWidgetItem(QIcon(":/icons/email_go.png"),"");
+	//m_table->setItem(row,0,item);
 
 	switch(evt->type)
 	{
-	case EVENT_DEFINE:	item = new QTableWidgetItem("DEFINE");
+	case EVENT_DEFINE:	item = new QTableWidgetItem(QIcon(":/icons/chart_line_edit.png"),"Edit");
+						m_table->setItem(row,0,item);
 						break;
-	case EVENT_GET:		item = new QTableWidgetItem("GET");
+	case EVENT_GET:		item = new QTableWidgetItem(QIcon(":/icons/chart_line.png"),"Get");
+						m_table->setItem(row,0,item);
 						break;
-	case EVENT_NOTIFY:	item = new QTableWidgetItem("NOTIFY");
+	case EVENT_NOTIFY:	item = new QTableWidgetItem(QIcon(":/icons/chart_line_error.png"),"Notify");
+						m_table->setItem(row,0,item);
 						break;
-	case EVENT_DEP:		item = new QTableWidgetItem("DEP");
+	case EVENT_DEP:		item = new QTableWidgetItem(QIcon(":/icons/chart_line_link.png"),"Link");
+						m_table->setItem(row,0,item);
 						break;
-	default:			item = new QTableWidgetItem("UNKNOWN");
+	default:			item = new QTableWidgetItem("Unknown");
+						m_table->setItem(row,0,item);
 						break;
 	}
-	m_table->setItem(row,1,item);
 
 	char buf[100];
 	dsb_nid_toStr(&(evt->d1),buf,100);
 	int pos = strlen(buf);
-	buf[pos++] = ',';
+	buf[pos++] = '\n';
 	dsb_nid_toStr(&(evt->d2),&(buf[pos]),100-pos);
 	item = new QTableWidgetItem(buf);
-	m_table->setItem(row,2,item);
+	m_table->setItem(row,1,item);
 
 	//Save the event somewhere if it is a GET event that needs updating
 	if (evt->type == EVENT_GET)
@@ -137,6 +141,17 @@ void EventLogger::toolclick(QAction *a)
 	if (a->text() == "Send")
 	{
 		m_gen->show();
+	}
+	else if (a->text() == "Clear")
+	{
+		m_table->clear();
+		QStringList headers;
+		headers.append("");
+		headers.append("Destination");
+		headers.append("Result");
+		headers.append("Data");
+		m_table->setHorizontalHeaderLabels(headers);
+		m_table->setRowCount(0);
 	}
 }
 

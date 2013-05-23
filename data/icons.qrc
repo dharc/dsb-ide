@@ -7,5 +7,12 @@
 		<file>icons/tick.png</file>
 		<file>icons/email.png</file>
 		<file>icons/email_go.png</file>
+		<file>icons/chart_line.png</file>
+		<file>icons/chart_line_add.png</file>
+		<file>icons/chart_line_delete.png</file>
+		<file>icons/chart_line_edit.png</file>
+		<file>icons/chart_line_error.png</file>
+		<file>icons/chart_line_link.png</file>
+		<file>icons/add.png</file>
 	</qresource>
 </RCC>
