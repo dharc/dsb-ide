@@ -264,6 +264,8 @@ void EventGenerator::dep2changed(const QString &txt)
 void EventGenerator::sendclicked()
 {
 	//Actually send the event here.
+	m_event.eval = 0;
+	m_event.flags = 0;
 	dsb_send(&m_event,1);
 }
 

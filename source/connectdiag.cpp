@@ -1,7 +1,7 @@
 /*
- * main.cpp
+ * connectdiag.cpp
  *
- *  Created on: 22 May 2013
+ *  Created on: 24 May 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,42 +32,72 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#include <qt4/Qt/QtGui>
-#include "eventlog.h"
 #include "connectdiag.h"
-#include "dsb/event.h"
-#include "dsb/wrap.h"
+#include <qt4/QtGui/QLineEdit>
+#include <qt4/QtGui/QLabel>
+#include <qt4/QtGui/QPushButton>
+#include <qt4/QtGui/QHBoxLayout>
+#include <qt4/QtGui/QVBoxLayout>
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
-#include "dsb/nid.h"
-#include <iostream>
 
-EventLogger *evtlogger = 0;
-int hostsock = 0;
+extern int hostsock;
 
-extern "C"
+ConnectDialog::ConnectDialog()
+	: QWidget(0, Qt::Dialog)
 {
-int dsb_send(Event_t *evt, int async)
+	QVBoxLayout *mainlayout = new QVBoxLayout();
+	QHBoxLayout *msglayout = new QHBoxLayout();
+	QHBoxLayout *hostlayout = new QHBoxLayout();
+	QHBoxLayout *buttonlayout = new QHBoxLayout();
+
+	mainlayout->addLayout(msglayout);
+	mainlayout->addLayout(hostlayout);
+	mainlayout->addLayout(buttonlayout);
+
+	m_message = new QLabel("Enter location of a DSBD instance:");
+	msglayout->addWidget(m_message);
+
+	m_urllabel = new QLabel("Host [:port]:");
+	m_host = new QLineEdit();
+	m_host->setAutoFillBackground(true);
+	m_host->setMinimumWidth(200);
+	hostlayout->addWidget(m_urllabel);
+	hostlayout->addWidget(m_host);
+
+	m_ok = new QPushButton("Connect");
+	m_cancel = new QPushButton("Cancel");
+	buttonlayout->addWidget(m_ok);
+	buttonlayout->addWidget(m_cancel);
+
+	setLayout(mainlayout);
+	setWindowTitle("Connect");
+	show();
+
+	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
+	connect(m_ok, SIGNAL(clicked()), this, SLOT(connectclicked()));
+}
+
+ConnectDialog::~ConnectDialog()
 {
-	//Record the event.
-	int res = dsb_net_send_event(hostsock, evt, async);
-	evtlogger->addEvent(evt);
-	return res;
-}
+
 }
 
-int main(int argc, char *argv[])
+void ConnectDialog::connectclicked()
 {
-	QApplication qtapp(argc,argv);
-
-	dsb_net_init();
-
-	evtlogger = new EventLogger();
-	new ConnectDialog();
-
-	QApplication::exec();
-
-	dsb_net_final();
-
-	return 0;
+	hostsock = dsb_net_connect(m_host->text().toAscii().constData());
+	if (hostsock == -1)
+	{
+		m_message->setText("Could not connect to host!");
+	}
+	else
+	{
+		hide();
+	}
 }
+
+void ConnectDialog::cancelclicked()
+{
+	hide();
+}
+

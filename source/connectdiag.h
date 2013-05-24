@@ -1,7 +1,7 @@
 /*
- * main.cpp
+ * connectdiag.h
  *
- *  Created on: 22 May 2013
+ *  Created on: 24 May 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,42 +32,36 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#include <qt4/Qt/QtGui>
-#include "eventlog.h"
-#include "connectdiag.h"
-#include "dsb/event.h"
-#include "dsb/wrap.h"
-#include "dsb/net.h"
-#include "dsb/net_protocol.h"
-#include "dsb/nid.h"
-#include <iostream>
+#ifndef CONNECTDIAG_H_
+#define CONNECTDIAG_H_
 
-EventLogger *evtlogger = 0;
-int hostsock = 0;
+#include <qt4/QtGui/QWidget>
 
-extern "C"
+class QLineEdit;
+class QPushButton;
+class QLabel;
+
+class ConnectDialog : public QWidget
 {
-int dsb_send(Event_t *evt, int async)
-{
-	//Record the event.
-	int res = dsb_net_send_event(hostsock, evt, async);
-	evtlogger->addEvent(evt);
-	return res;
-}
-}
+		Q_OBJECT
 
-int main(int argc, char *argv[])
-{
-	QApplication qtapp(argc,argv);
+public:
+		ConnectDialog();
+		~ConnectDialog();
 
-	dsb_net_init();
+private:
+		QLabel *m_message;
+		QLabel *m_urllabel;
+		QLineEdit *m_host;
+		//QLineEdit *m_port;
+		QPushButton *m_ok;
+		QPushButton *m_cancel;
 
-	evtlogger = new EventLogger();
-	new ConnectDialog();
+public slots:
+		void connectclicked();
+		void cancelclicked();
+};
 
-	QApplication::exec();
 
-	dsb_net_final();
 
-	return 0;
-}
+#endif /* CONNECTDIAG_H_ */

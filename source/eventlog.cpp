@@ -35,7 +35,9 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "eventlog.h"
 #include "eventgen.h"
-#include <dsb/net.h>
+#include "dsb/net.h"
+#include "dsb/net_protocol.h"
+#include "dsb/errors.h"
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
 #include <qt4/QtGui/QAction>
@@ -43,6 +45,26 @@ either expressed or implied, of the FreeBSD Project.
 #include <iostream>
 #include <stdio.h>
 
+static QTableWidgetItem *itemlist[MAX_READLIST];
+
+int net_cb_result(int sock, void *data)
+{
+	struct DSBNetEventResult *res = (struct DSBNetEventResult*)data;
+
+	//Call original event handler.
+	//TODO, should check that this is the current event handler.
+	dsb_net_cb_result(sock,data);
+
+	if (itemlist[res->id] != 0)
+	{
+		char buf[100];
+		dsb_nid_toStr(&(res->res), buf, 100);
+		itemlist[res->id]->setText(buf);
+		itemlist[res->id]->setIcon(QIcon(":/icons/tick.png"));
+	}
+
+	return SUCCESS;
+}
 
 EventLogger::EventLogger()
 	: QWidget()
@@ -75,9 +97,13 @@ EventLogger::EventLogger()
 
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 
+	//Create the network polling timer.
 	QTimer *nettimer = new QTimer(this);
 	connect(nettimer, SIGNAL(timeout()), this, SLOT(netpoll()));
 	nettimer->start(20);
+
+	//Replace the default result handler to intercept.
+	dsb_net_callback(DSBNET_EVENTRESULT,net_cb_result);
 }
 
 EventLogger::~EventLogger()
@@ -115,6 +141,7 @@ void EventLogger::addEvent(Event_t *evt)
 						m_table->setItem(row,0,item);
 						item = new QTableWidgetItem(QIcon(":/icons/hourglass.png"),"waiting...");
 						m_table->setItem(row,2,item);
+						itemlist[evt->eval] = item;
 						break;
 	case EVENT_NOTIFY:	item = new QTableWidgetItem(QIcon(":/icons/chart_line_error.png"),"Notify");
 						m_table->setItem(row,0,item);
@@ -137,7 +164,7 @@ void EventLogger::addEvent(Event_t *evt)
 
 	dsb_nid_toStr(&(evt->d1),buf,100);
 	pos = strlen(buf);
-	buf[pos++] = '\n';
+	buf[pos++] = ',';
 	dsb_nid_toStr(&(evt->d2),&(buf[pos]),100-pos);
 	item = new QTableWidgetItem(buf);
 	m_table->setItem(row,1,item);
