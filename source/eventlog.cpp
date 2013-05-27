@@ -34,6 +34,7 @@ either expressed or implied, of the FreeBSD Project.
 
 
 #include "eventlog.h"
+#include "msglog.h"
 #include "eventgen.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
@@ -46,10 +47,13 @@ either expressed or implied, of the FreeBSD Project.
 #include <stdio.h>
 
 static QTableWidgetItem *itemlist[MAX_READLIST];
+extern MessageLogger *msglogger;
 
 int net_cb_result(int sock, void *data)
 {
 	struct DSBNetEventResult *res = (struct DSBNetEventResult*)data;
+
+	msglogger->addMessage(DSBNET_EVENTRESULT,data);
 
 	//Call original event handler.
 	//TODO, should check that this is the current event handler.
@@ -72,30 +76,14 @@ EventLogger::EventLogger()
 	QVBoxLayout *mainlayout = new QVBoxLayout();
 	setLayout(mainlayout);
 
-	m_bar = new QToolBar();
-	m_bar->addAction(QIcon(":/icons/add.png"),"Send");
-	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
-	m_bar->addAction(QIcon(":/icons/control_pause_blue.png"),"Pause");
-	mainlayout->addWidget(m_bar);
-
-	m_table = new QTableWidget();
-	m_table->setColumnCount(3);
-	m_table->setShowGrid(false);
-	QStringList headers;
-	headers.append("");
-	headers.append("Destination");
-	headers.append("Data");
-	m_table->setHorizontalHeaderLabels(headers);
-	m_table->setColumnWidth(2, 300);
-	mainlayout->addWidget(m_table);
+	make_toolbar(mainlayout);
+	make_table(mainlayout);
 
 	m_gen = new EventGenerator();
 
 	setWindowTitle("Event Logger");
 	resize(600,400);
 	show();
-
-	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 
 	//Create the network polling timer.
 	QTimer *nettimer = new QTimer(this);
@@ -109,6 +97,30 @@ EventLogger::EventLogger()
 EventLogger::~EventLogger()
 {
 
+}
+
+void EventLogger::make_table(QLayout *l)
+{
+	m_table = new QTableWidget();
+	m_table->setColumnCount(3);
+	m_table->setShowGrid(false);
+	QStringList headers;
+	headers.append("");
+	headers.append("Destination");
+	headers.append("Data");
+	m_table->setHorizontalHeaderLabels(headers);
+	m_table->setColumnWidth(2, 300);
+	l->addWidget(m_table);
+}
+
+void EventLogger::make_toolbar(QLayout *l)
+{
+	m_bar = new QToolBar();
+	m_bar->addAction(QIcon(":/icons/add.png"),"Send");
+	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
+	m_bar->addAction(QIcon(":/icons/control_pause_blue.png"),"Pause");
+	l->addWidget(m_bar);
+	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
 
 void EventLogger::updateEvent(int id, NID_t *res)

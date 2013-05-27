@@ -35,6 +35,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/Qt/QtGui>
 #include "eventlog.h"
 #include "connectdiag.h"
+#include "msglog.h"
 #include "dsb/event.h"
 #include "dsb/wrap.h"
 #include "dsb/net.h"
@@ -43,6 +44,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <iostream>
 
 EventLogger *evtlogger = 0;
+MessageLogger *msglogger = 0;
 int hostsock = 0;
 
 extern "C"
@@ -52,6 +54,7 @@ int dsb_send(Event_t *evt, int async)
 	//Record the event.
 	int res = dsb_net_send_event(hostsock, evt, async);
 	evtlogger->addEvent(evt);
+	msglogger->addMessage(DSBNET_SENDEVENT,evt);
 	return res;
 }
 }
@@ -63,6 +66,7 @@ int main(int argc, char *argv[])
 	dsb_net_init();
 
 	evtlogger = new EventLogger();
+	msglogger = new MessageLogger();
 	new ConnectDialog();
 
 	QApplication::exec();

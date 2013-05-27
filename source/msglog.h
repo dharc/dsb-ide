@@ -1,7 +1,7 @@
 /*
- * eventlog.h
+ * msglog.h
  *
- *  Created on: 22 May 2013
+ *  Created on: 27 May 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,39 +32,30 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef EVENTLOG_H_
-#define EVENTLOG_H_
+#ifndef MSGLOG_H_
+#define MSGLOG_H_
 
 #include <qt4/QtGui/QWidget>
-#include <qt4/QtGui/QTableWidget>
-#include <qt4/QtGui/QToolBar>
-#include <dsb/event.h>
 
-class QAction;
-class EventGenerator;
+class QTreeWidget;
+class QLayout;
 
-class EventLogger : public QWidget
+class MessageLogger : public QWidget
 {
 	Q_OBJECT
 
 public:
-	EventLogger();
-	~EventLogger();
+	MessageLogger();
+	~MessageLogger();
 
-	void addEvent(Event_t *evt);
-	void updateEvent(int id, NID_t *res);
+	void addMessage(unsigned short type, void *data);
 
 private:
-	QToolBar *m_bar;
-	QTableWidget *m_table;
-	EventGenerator *m_gen;
+	QTreeWidget *m_tree;
 
-	void make_table(QLayout *);
-	void make_toolbar(QLayout *);
-
-public slots:
-	void toolclick(QAction *);
-	void netpoll();
+	void make_tree(QLayout *);
 };
 
-#endif /* EVENTLOG_H_ */
+
+
+#endif /* MSGLOG_H_ */
