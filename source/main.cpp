@@ -57,6 +57,9 @@ int dsb_send(Event_t *evt, int async)
 	res = dsb_net_send_event(hostsock, evt, async);
 	evtlogger->addEvent(evt);
 	msglogger->addMessage(DSBNET_SENDEVENT,evt);
+
+	//TODO free the event if it needs to be freed.
+
 	return res;
 }
 }
