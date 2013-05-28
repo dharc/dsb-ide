@@ -84,6 +84,7 @@ public slots:
 	void sendclicked();
 	void cancelclicked();
 	void typechanged(int index);
+	void evalchanged(int index);
 };
 
 

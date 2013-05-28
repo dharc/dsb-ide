@@ -41,6 +41,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"
+#include "dsb/common.h"
 #include <iostream>
 
 EventLogger *evtlogger = 0;
@@ -51,8 +52,9 @@ extern "C"
 {
 int dsb_send(Event_t *evt, int async)
 {
+	int res;
 	//Record the event.
-	int res = dsb_net_send_event(hostsock, evt, async);
+	res = dsb_net_send_event(hostsock, evt, async);
 	evtlogger->addEvent(evt);
 	msglogger->addMessage(DSBNET_SENDEVENT,evt);
 	return res;
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
 {
 	QApplication qtapp(argc,argv);
 
-	dsb_net_init();
+	dsb_common_init();
 
 	evtlogger = new EventLogger();
 	msglogger = new MessageLogger();
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
 
 	QApplication::exec();
 
-	dsb_net_final();
+	dsb_common_final();
 
 	return 0;
 }

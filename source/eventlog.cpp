@@ -153,7 +153,7 @@ void EventLogger::addEvent(Event_t *evt)
 						m_table->setItem(row,0,item);
 						item = new QTableWidgetItem(QIcon(":/icons/hourglass.png"),"waiting...");
 						m_table->setItem(row,2,item);
-						itemlist[evt->eval] = item;
+						itemlist[evt->resid] = item;
 						break;
 	case EVENT_NOTIFY:	item = new QTableWidgetItem(QIcon(":/icons/chart_line_error.png"),"Notify");
 						m_table->setItem(row,0,item);

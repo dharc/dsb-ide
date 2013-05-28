@@ -46,6 +46,8 @@ extern "C"
 int dsb_send(struct Event *,int);
 }
 
+NID_t gres;
+
 EventGenerator::EventGenerator()
 	: QWidget(0, Qt::Dialog)
 {
@@ -142,6 +144,7 @@ EventGenerator::EventGenerator()
 	//show();
 
 	connect(m_type, SIGNAL(currentIndexChanged(int)), this, SLOT(typechanged(int)));
+	connect(m_eval, SIGNAL(currentIndexChanged(int)), this, SLOT(evalchanged(int)));
 	connect(m_dest1, SIGNAL(textChanged(const QString &)), this, SLOT(dest1changed(const QString &)));
 	connect(m_dest2, SIGNAL(textChanged(const QString &)), this, SLOT(dest2changed(const QString &)));
 	connect(m_def, SIGNAL(textChanged(const QString &)), this, SLOT(defchanged(const QString &)));
@@ -264,14 +267,26 @@ void EventGenerator::dep2changed(const QString &txt)
 void EventGenerator::sendclicked()
 {
 	//Actually send the event here.
-	m_event.eval = 0;
+	//m_event.eval = 0;
 	m_event.flags = 0;
+	if (m_event.type == EVENT_GET)
+	{
+		m_event.res = &gres;
+	}
 	dsb_send(&m_event,1);
 }
 
 void EventGenerator::cancelclicked()
 {
 	hide();
+}
+
+void EventGenerator::evalchanged(int index)
+{
+	if (m_event.type == EVENT_DEFINE)
+	{
+		m_event.eval = index;
+	}
 }
 
 void EventGenerator::typechanged(int index)
@@ -283,6 +298,7 @@ void EventGenerator::typechanged(int index)
 			m_eval->setEnabled(true);
 			m_dep1->setEnabled(false);
 			m_dep2->setEnabled(false);
+			m_event.eval = m_eval->currentIndex();
 			break;
 	case 1: m_event.type = EVENT_NOTIFY;
 			m_def->setEnabled(false);

@@ -40,6 +40,9 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QVBoxLayout>
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
+#include "dsb/string.h"
+
+#include <iostream>
 
 extern int hostsock;
 
@@ -92,6 +95,13 @@ void ConnectDialog::connectclicked()
 	}
 	else
 	{
+		NID_t t;
+		char buf[100];
+		dsb_iton(0,&t);
+		//Test
+		dsb_string_cton(&t,"Hello World");
+		dsb_string_ntoc(buf,100,&t);
+		std::cout << "String = " << buf << "\n";
 		hide();
 	}
 }
