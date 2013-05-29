@@ -96,11 +96,11 @@ void ConnectDialog::connectclicked()
 	else
 	{
 		NID_t t;
-		char buf[200];
+		char buf[300];
 		dsb_iton(0,&t);
 		//Test
 		dsb_string_cton(&t,"Need a long string to test DSB async get performance. Also might run out of readlist entries so this needs to be more than 100 characters.");
-		dsb_string_ntoc(buf,200,&t);
+		dsb_string_ntoc(buf,300,&t);
 		std::cout << "String = " << buf << "\n";
 		hide();
 	}

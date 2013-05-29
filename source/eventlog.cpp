@@ -37,6 +37,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "msglog.h"
 #include "eventgen.h"
 #include "dsb/net.h"
+#include "dsb/nid.h"
 #include "dsb/net_protocol.h"
 #include "dsb/errors.h"
 #include <qt4/QtGui/QHBoxLayout>
@@ -51,7 +52,10 @@ extern MessageLogger *msglogger;
 
 int net_cb_result(int sock, void *data)
 {
-	struct DSBNetEventResult *res = (struct DSBNetEventResult*)data;
+	int resid = *((int*)data);
+	NID_t res;
+
+	dsb_nid_unpack((const char*)((char*)data+sizeof(int)), &res);
 
 	msglogger->addMessage(DSBNET_EVENTRESULT,data);
 
@@ -59,12 +63,12 @@ int net_cb_result(int sock, void *data)
 	//TODO, should check that this is the current event handler.
 	dsb_net_cb_result(sock,data);
 
-	if (itemlist[res->id] != 0)
+	if (itemlist[resid] != 0)
 	{
 		char buf[100];
-		dsb_nid_toStr(&(res->res), buf, 100);
-		itemlist[res->id]->setText(buf);
-		itemlist[res->id]->setIcon(QIcon(":/icons/tick.png"));
+		dsb_nid_toStr(&(res), buf, 100);
+		itemlist[resid]->setText(buf);
+		itemlist[resid]->setIcon(QIcon(":/icons/tick.png"));
 	}
 
 	return SUCCESS;
