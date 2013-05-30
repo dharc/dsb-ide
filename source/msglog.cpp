@@ -44,9 +44,15 @@ either expressed or implied, of the FreeBSD Project.
 
 extern MessageLogger *msglogger;
 
-int net_cb_error(int sock, void *data)
+int net_cb_error(void *sock, void *data)
 {
 	msglogger->addMessage(DSBNET_ERROR,data);
+	return 0;
+}
+
+int net_cb_debugevent(void *sock, void *data)
+{
+	msglogger->addMessage(DSBNET_DEBUGEVENT,data);
 	return 0;
 }
 
@@ -88,6 +94,34 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 
 	switch(type)
 	{
+	case DSBNET_DEBUGEVENT:
+		//Unpack the event
+		dsb_event_unpack((const char*)data,&evt);
+		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_DEBUGEVENT")));
+		item->setIcon(0,QIcon(":/icons/email_go.png"));
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Type")) << QString("0x%1").arg(evt.type,0,16));
+		dsb_nid_toStr(&(evt.d1),buf,100);
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Dest1")) << QString(buf));
+		dsb_nid_toStr(&(evt.d2),buf,100);
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Dest2")) << QString(buf));
+
+		switch(evt.type)
+		{
+		case EVENT_DEFINE:
+			item2 = new QTreeWidgetItem(item, QStringList(QString("Evaluator")) << QString("%1").arg(evt.eval));
+			dsb_nid_toStr(&(evt.def),buf,100);
+			item2 = new QTreeWidgetItem(item, QStringList(QString("Definition")) << QString(buf));
+			break;
+		case EVENT_GET:
+			item2 = new QTreeWidgetItem(item, QStringList(QString("ID")) << QString("%1").arg(evt.resid));
+			break;
+		default: break;
+		}
+
+		m_tree->insertTopLevelItem(0,item);
+		item->setExpanded(true);
+		break;
+
 	case DSBNET_SENDEVENT:
 		//Unpack the event
 		dsb_event_unpack((const char*)data,&evt);
@@ -113,6 +147,7 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		}
 
 		m_tree->insertTopLevelItem(0,item);
+		item->setExpanded(true);
 		break;
 
 	case DSBNET_EVENTRESULT:
@@ -124,6 +159,7 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		dsb_nid_toStr(&(evt.d1),buf,100);
 		item2 = new QTreeWidgetItem(item, QStringList(QString("Result")) << QString(buf));
 		m_tree->insertTopLevelItem(0,item);
+		item->setExpanded(true);
 		break;
 
 	case DSBNET_ERROR:
@@ -131,6 +167,7 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 			item->setIcon(0,QIcon(":/icons/email_open.png"));
 			item2 = new QTreeWidgetItem(item, QStringList(QString("Error")) << QString(dsb_log_str(evt.err)));
 			m_tree->insertTopLevelItem(0,item);
+			item->setExpanded(true);
 			break;
 	default:				break;
 	}

@@ -46,7 +46,7 @@ either expressed or implied, of the FreeBSD Project.
 
 EventLogger *evtlogger = 0;
 MessageLogger *msglogger = 0;
-int hostsock = 0;
+void *hostsock = 0;
 
 extern "C"
 {

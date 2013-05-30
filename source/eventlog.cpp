@@ -50,7 +50,7 @@ either expressed or implied, of the FreeBSD Project.
 static QTableWidgetItem *itemlist[MAX_READLIST];
 extern MessageLogger *msglogger;
 
-int net_cb_result(int sock, void *data)
+int net_cb_result(void *sock, void *data)
 {
 	int resid = *((int*)data);
 	NID_t res;

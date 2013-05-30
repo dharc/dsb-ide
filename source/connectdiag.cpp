@@ -44,7 +44,7 @@ either expressed or implied, of the FreeBSD Project.
 
 #include <iostream>
 
-extern int hostsock;
+extern void *hostsock;
 
 ConnectDialog::ConnectDialog()
 	: QWidget(0, Qt::Dialog)
@@ -89,7 +89,7 @@ ConnectDialog::~ConnectDialog()
 void ConnectDialog::connectclicked()
 {
 	hostsock = dsb_net_connect(m_host->text().toAscii().constData());
-	if (hostsock == -1)
+	if (hostsock == 0)
 	{
 		m_message->setText("Could not connect to host!");
 	}
