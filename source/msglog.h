@@ -39,6 +39,8 @@ either expressed or implied, of the FreeBSD Project.
 
 class QTreeWidget;
 class QLayout;
+class QToolBar;
+class MessageGenerator;
 
 class MessageLogger : public QWidget
 {
@@ -52,8 +54,15 @@ public:
 
 private:
 	QTreeWidget *m_tree;
+	QToolBar *m_bar;
+	MessageGenerator *m_gen;
 
 	void make_tree(QLayout *);
+	void make_toolbar(QLayout *);
+
+public slots:
+	void toolclick(QAction *);
+	void netpoll();
 };
 
 

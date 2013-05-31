@@ -34,6 +34,7 @@ either expressed or implied, of the FreeBSD Project.
 
 
 #include "msglog.h"
+#include "msggen.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"
@@ -41,20 +42,10 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
+#include <qt4/QtGui/QAction>
+#include <qt4/QtGui/QToolBar>
+#include <qt4/QtCore/QTimer>
 
-extern MessageLogger *msglogger;
-
-int net_cb_error(void *sock, void *data)
-{
-	msglogger->addMessage(DSBNET_ERROR,data);
-	return 0;
-}
-
-int net_cb_debugevent(void *sock, void *data)
-{
-	msglogger->addMessage(DSBNET_DEBUGEVENT,data);
-	return 0;
-}
 
 MessageLogger::MessageLogger()
 	: QWidget()
@@ -62,17 +53,19 @@ MessageLogger::MessageLogger()
 	QVBoxLayout *mainlayout = new QVBoxLayout();
 	setLayout(mainlayout);
 
-	m_tree = new QTreeWidget();
-	m_tree->setColumnCount(2);
-	m_tree->setHeaderLabels(QStringList(QString("Name")) << QString("Value"));
-	m_tree->setColumnWidth(0,250);
-	mainlayout->addWidget(m_tree);
+	make_toolbar(mainlayout);
+	make_tree(mainlayout);
 
 	setWindowTitle("Message Log");
 	resize(600,400);
 	show();
 
-	dsb_net_callback(DSBNET_ERROR,net_cb_error);
+	//Create the network polling timer.
+	QTimer *nettimer = new QTimer(this);
+	connect(nettimer, SIGNAL(timeout()), this, SLOT(netpoll()));
+	nettimer->start(20);
+
+	m_gen = new MessageGenerator();
 }
 
 MessageLogger::~MessageLogger()
@@ -80,9 +73,23 @@ MessageLogger::~MessageLogger()
 
 }
 
+void MessageLogger::make_toolbar(QLayout *l)
+{
+	m_bar = new QToolBar();
+	m_bar->addAction(QIcon(":/icons/add.png"),"Send");
+	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
+	m_bar->addAction(QIcon(":/icons/control_pause_blue.png"),"Pause");
+	l->addWidget(m_bar);
+	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
+}
+
 void MessageLogger::make_tree(QLayout *l)
 {
-
+	m_tree = new QTreeWidget();
+	m_tree->setColumnCount(2);
+	m_tree->setHeaderLabels(QStringList(QString("Name")) << QString("Value"));
+	m_tree->setColumnWidth(0,250);
+	l->addWidget(m_tree);
 }
 
 void MessageLogger::addMessage(unsigned short type, void *data)
@@ -171,4 +178,22 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 			break;
 	default:				break;
 	}
+}
+
+void MessageLogger::toolclick(QAction *a)
+{
+	if (a->text() == "Send")
+	{
+		m_gen->show();
+	}
+	else if (a->text() == "Clear")
+	{
+		m_tree->clear();
+
+	}
+}
+
+void MessageLogger::netpoll()
+{
+	dsb_net_poll(0);
 }

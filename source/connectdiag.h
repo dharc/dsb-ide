@@ -52,7 +52,11 @@ public:
 private:
 		QLabel *m_message;
 		QLabel *m_urllabel;
+		QLabel *m_userlabel;
+		QLabel *m_passlabel;
 		QLineEdit *m_host;
+		QLineEdit *m_user;
+		QLineEdit *m_pass;
 		//QLineEdit *m_port;
 		QPushButton *m_ok;
 		QPushButton *m_cancel;

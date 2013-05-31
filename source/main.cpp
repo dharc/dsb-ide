@@ -36,6 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "eventlog.h"
 #include "connectdiag.h"
 #include "msglog.h"
+#include "assembler.h"
 #include "dsb/event.h"
 #include "dsb/wrap.h"
 #include "dsb/net.h"
@@ -44,7 +45,6 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/common.h"
 #include <iostream>
 
-EventLogger *evtlogger = 0;
 MessageLogger *msglogger = 0;
 void *hostsock = 0;
 
@@ -53,15 +53,44 @@ extern "C"
 int dsb_send(Event_t *evt, int async)
 {
 	int res;
+	char buf[100];
 	//Record the event.
 	res = dsb_net_send_event(hostsock, evt, async);
-	evtlogger->addEvent(evt);
-	msglogger->addMessage(DSBNET_SENDEVENT,evt);
+	dsb_event_pack(evt,buf,100);
+	msglogger->addMessage(DSBNET_SENDEVENT,buf);
 
 	//TODO free the event if it needs to be freed.
 
 	return res;
 }
+}
+
+int net_cb_result(void *sock, void *data)
+{
+	//int resid = *((int*)data);
+	NID_t res;
+
+	dsb_nid_unpack((const char*)((char*)data+sizeof(int)), &res);
+
+	msglogger->addMessage(DSBNET_EVENTRESULT,data);
+
+	//Call original event handler.
+	//TODO, should check that this is the current event handler.
+	dsb_net_cb_result(sock,data);
+
+	return SUCCESS;
+}
+
+int net_cb_error(void *sock, void *data)
+{
+	msglogger->addMessage(DSBNET_ERROR,data);
+	return 0;
+}
+
+int net_cb_debugevent(void *sock, void *data)
+{
+	msglogger->addMessage(DSBNET_DEBUGEVENT,data);
+	return 0;
 }
 
 int main(int argc, char *argv[])
@@ -70,9 +99,12 @@ int main(int argc, char *argv[])
 
 	dsb_common_init();
 
-	evtlogger = new EventLogger();
+	dsb_net_callback(DSBNET_EVENTRESULT,net_cb_result);
+	dsb_net_callback(DSBNET_ERROR,net_cb_error);
+
 	msglogger = new MessageLogger();
 	new ConnectDialog();
+	new Assembler();
 
 	QApplication::exec();
 

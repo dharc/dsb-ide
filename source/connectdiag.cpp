@@ -52,10 +52,14 @@ ConnectDialog::ConnectDialog()
 	QVBoxLayout *mainlayout = new QVBoxLayout();
 	QHBoxLayout *msglayout = new QHBoxLayout();
 	QHBoxLayout *hostlayout = new QHBoxLayout();
+	QHBoxLayout *userlayout = new QHBoxLayout();
+	QHBoxLayout *passlayout = new QHBoxLayout();
 	QHBoxLayout *buttonlayout = new QHBoxLayout();
 
 	mainlayout->addLayout(msglayout);
 	mainlayout->addLayout(hostlayout);
+	mainlayout->addLayout(userlayout);
+	mainlayout->addLayout(passlayout);
 	mainlayout->addLayout(buttonlayout);
 
 	m_message = new QLabel("Enter location of a DSBD instance:");
@@ -67,6 +71,18 @@ ConnectDialog::ConnectDialog()
 	m_host->setMinimumWidth(200);
 	hostlayout->addWidget(m_urllabel);
 	hostlayout->addWidget(m_host);
+
+	m_userlabel = new QLabel("Username:");
+	m_user = new QLineEdit();
+	m_user->setAutoFillBackground(true);
+	userlayout->addWidget(m_userlabel);
+	userlayout->addWidget(m_user);
+
+	m_passlabel = new QLabel("Password:");
+	m_pass = new QLineEdit();
+	m_pass->setAutoFillBackground(true);
+	passlayout->addWidget(m_passlabel);
+	passlayout->addWidget(m_pass);
 
 	m_ok = new QPushButton("Connect");
 	m_cancel = new QPushButton("Cancel");

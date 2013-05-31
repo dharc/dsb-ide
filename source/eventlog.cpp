@@ -50,29 +50,6 @@ either expressed or implied, of the FreeBSD Project.
 static QTableWidgetItem *itemlist[MAX_READLIST];
 extern MessageLogger *msglogger;
 
-int net_cb_result(void *sock, void *data)
-{
-	int resid = *((int*)data);
-	NID_t res;
-
-	dsb_nid_unpack((const char*)((char*)data+sizeof(int)), &res);
-
-	msglogger->addMessage(DSBNET_EVENTRESULT,data);
-
-	//Call original event handler.
-	//TODO, should check that this is the current event handler.
-	dsb_net_cb_result(sock,data);
-
-	if (itemlist[resid] != 0)
-	{
-		char buf[100];
-		dsb_nid_toStr(&(res), buf, 100);
-		itemlist[resid]->setText(buf);
-		itemlist[resid]->setIcon(QIcon(":/icons/tick.png"));
-	}
-
-	return SUCCESS;
-}
 
 EventLogger::EventLogger()
 	: QWidget()
@@ -89,13 +66,10 @@ EventLogger::EventLogger()
 	resize(600,400);
 	show();
 
-	//Create the network polling timer.
-	QTimer *nettimer = new QTimer(this);
-	connect(nettimer, SIGNAL(timeout()), this, SLOT(netpoll()));
-	nettimer->start(20);
+
 
 	//Replace the default result handler to intercept.
-	dsb_net_callback(DSBNET_EVENTRESULT,net_cb_result);
+
 }
 
 EventLogger::~EventLogger()
