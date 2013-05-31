@@ -32,6 +32,7 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
+#include "asmsyntax.h"
 #include "assembler.h"
 #include "dsb/assembler.h"
 #include "dsb/vm.h"
@@ -43,6 +44,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QTextEdit>
 #include <qt4/QtGui/QTableWidget>
 #include <qt4/QtGui/QSplitter>
+#include <qt4/QtGui/QLabel>
 #include <iostream>
 
 Assembler::Assembler()
@@ -56,13 +58,20 @@ Assembler::Assembler()
 	m_bar->addAction(QIcon(":/icons/script.png"),"New");
 	m_bar->addAction(QIcon(":/icons/folder.png"),"Open");
 	m_bar->addAction(QIcon(":/icons/disk.png"),"Save");
+	m_bar->addSeparator();
+	m_bar->addAction(QIcon(":/icons/table_edit.png"),"Edit Object");
+	m_bar->addAction(QIcon(":/icons/table_save.png"),"Save Object");
+	m_bar->addSeparator();
 	m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Run");
 	m_bar->addAction(QIcon(":/icons/bug.png"),"Debug");
+
 	mainlayout->addWidget(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 
 	mainlayout->addWidget(split);
 	m_asm = new QTextEdit();
+	m_asm->setFont(QFont("Courier New", 10));
+	Syntax *syn = new Syntax(m_asm->document());
 	split->addWidget(m_asm);
 	m_regs = new QTableWidget();
 	m_regs->setColumnCount(1);
@@ -76,15 +85,26 @@ Assembler::Assembler()
 	sizes.append(20);
 	split->setSizes(sizes);
 
+	m_result = new QLabel("Result = null");
+	mainlayout->addWidget(m_result);
+
 	setWindowTitle("DSB Assembler");
 	resize(700,400);
 	show();
+
+	m_running = false;
 }
 
 Assembler::~Assembler()
 {
 
 }
+
+static NID_t reg[16];
+static NID_t code[200];
+static NID_t res;
+static int codesize;
+static int curip;
 
 void Assembler::toolclick(QAction *a)
 {
@@ -94,17 +114,50 @@ void Assembler::toolclick(QAction *a)
 	}
 	else if (a->text() == "Run")
 	{
-		NID_t code[200];
-		NID_t reg[16];
-		NID_t res;
 		QTableWidgetItem *item;
 
-		int size = dsb_assemble(m_asm->toPlainText().toAscii().constData(),code,200);
-		dsb_vm_interpret_reg(code,size,reg,0,0,&res);
+		codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),code,200);
+		dsb_vm_interpret_reg(code,codesize,reg,0,0,&res);
 
 		char buf[100];
 		dsb_nid_toStr(&res, buf, 100);
-		std::cout << "Result: " << buf << "\n";
+		m_result->setText(QString("Result = %1").arg(buf));
+
+		//Update register table.
+		for (int i=0; i<16; i++)
+		{
+			dsb_nid_toStr(&reg[i],buf,100);
+			item = new QTableWidgetItem(buf);
+			m_regs->setItem(i,0,item);
+		}
+	}
+	else if (a->text() == "Debug")
+	{
+		char buf[100];
+		QTableWidgetItem *item;
+		int tmp;
+
+		codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),code,200);
+
+		if (m_running == false)
+		{
+			curip = 0;
+			m_running = true;
+		}
+
+		tmp = dsb_vm_interpret_reg(&code[curip],1,reg,0,0,&res);
+
+		if (tmp == -1)
+		{
+			m_running = false;
+			curip = 0;
+			dsb_nid_toStr(&res, buf, 100);
+			m_result->setText(QString("Result = %1").arg(buf));
+		}
+		else
+		{
+			curip += tmp;
+		}
 
 		//Update register table.
 		for (int i=0; i<16; i++)

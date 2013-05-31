@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-D_DEBUG -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
 
-set(DSBIDESRC source/main.cpp source/connectdiag.cpp source/msglog.cpp source/msggen.cpp source/assembler.cpp)
+set(DSBIDESRC source/main.cpp source/connectdiag.cpp source/msglog.cpp source/msggen.cpp source/assembler.cpp source/asmsyntax.cpp)
 set(DSBIDEHEADERS source/connectdiag.h source/msglog.h source/msggen.h source/assembler.h)
 set(DSBIDERCCS data/icons.qrc)
 

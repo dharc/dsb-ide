@@ -1,5 +1,5 @@
 /*
- * assember.h
+ * asmsyntax.h
  *
  *  Created on: 31 May 2013
  *      Author: nick
@@ -32,35 +32,31 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDEASSEMBLER_H_
-#define IDEASSEMBLER_H_
+#ifndef ASMSYNTAX_H_
+#define ASMSYNTAX_H_
 
-#include <qt4/QtGui/QWidget>
+#include <QSyntaxHighlighter>
+#include <QListWidget>
 
-class QAction;
-class QToolBar;
-class QTextEdit;
-class QTableWidget;
-class QLabel;
-
-class Assembler : public QWidget
+class Syntax : public QSyntaxHighlighter
 {
-	Q_OBJECT
-
 public:
-	Assembler();
-	~Assembler();
+	Syntax(QTextDocument *textEdit, QListWidget *kw=0);
+	~Syntax();
+
+	void highlightBlock ( const QString & text );
+
+	QTextCharFormat font_normal;
+	QTextCharFormat font_comment;
+	QTextCharFormat font_label;
+	QTextCharFormat font_number;
+	QTextCharFormat font_char;
+	QTextCharFormat font_op;
+	QTextCharFormat font_reg;
 
 private:
-	QToolBar *m_bar;
-	QTextEdit *m_asm;
-	QTableWidget *m_regs;
-	QLabel *m_result;
-
-	bool m_running;
-
-public slots:
-	void toolclick(QAction *);
+	QListWidget *m_keylist;
 };
 
-#endif /* ASSEMBER_H_ */
+
+#endif /* ASMSYNTAX_H_ */

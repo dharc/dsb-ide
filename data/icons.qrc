@@ -20,5 +20,7 @@
 		<file>icons/script.png</file>
 		<file>icons/disk.png</file>
 		<file>icons/bug.png</file>
+		<file>icons/table_edit.png</file>
+		<file>icons/table_save.png</file>
 	</qresource>
 </RCC>
