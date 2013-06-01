@@ -36,6 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #define IDEASSEMBLER_H_
 
 #include <qt4/QtGui/QWidget>
+#include "dsb/vm.h"
 
 class QAction;
 class QToolBar;
@@ -58,6 +59,7 @@ private:
 	QLabel *m_result;
 
 	bool m_running;
+	struct VMContext m_ctx;
 
 public slots:
 	void toolclick(QAction *);

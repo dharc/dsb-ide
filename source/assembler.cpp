@@ -93,6 +93,8 @@ Assembler::Assembler()
 	show();
 
 	m_running = false;
+	m_ctx.code = new NID_t[1000];
+	m_ctx.result = new NID_t;
 }
 
 Assembler::~Assembler()
@@ -100,11 +102,6 @@ Assembler::~Assembler()
 
 }
 
-static NID_t reg[16];
-static NID_t code[200];
-static NID_t res;
-static int codesize;
-static int curip;
 
 void Assembler::toolclick(QAction *a)
 {
@@ -115,54 +112,62 @@ void Assembler::toolclick(QAction *a)
 	else if (a->text() == "Run")
 	{
 		QTableWidgetItem *item;
+		m_ctx.ip = 0;
+		m_ctx.timeout = 10000;
 
-		codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),code,200);
-		dsb_vm_interpret_reg(code,codesize,reg,0,0,&res);
+		m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
+		dsb_vm_interpret_ctx(&m_ctx);
 
 		char buf[100];
-		dsb_nid_toStr(&res, buf, 100);
+		dsb_nid_toStr(m_ctx.result, buf, 100);
 		m_result->setText(QString("Result = %1").arg(buf));
 
 		//Update register table.
 		for (int i=0; i<16; i++)
 		{
-			dsb_nid_toStr(&reg[i],buf,100);
+			dsb_nid_toStr(&m_ctx.reg[i],buf,100);
 			item = new QTableWidgetItem(buf);
 			m_regs->setItem(i,0,item);
 		}
 	}
 	else if (a->text() == "Debug")
 	{
-		char buf[100];
 		QTableWidgetItem *item;
-		int tmp;
-
-		codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),code,200);
+		int ret;
+		m_ctx.timeout = 1;
 
 		if (m_running == false)
 		{
-			curip = 0;
+			m_ctx.ip = 0;
 			m_running = true;
+			dsb_nid_null(m_ctx.result);
 		}
 
-		tmp = dsb_vm_interpret_reg(&code[curip],1,reg,0,0,&res);
+		m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
+		ret = dsb_vm_interpret_ctx(&m_ctx);
 
-		if (tmp == -1)
-		{
+		if (ret == -1) {
 			m_running = false;
-			curip = 0;
-			dsb_nid_toStr(&res, buf, 100);
-			m_result->setText(QString("Result = %1").arg(buf));
+			m_ctx.ip++;
 		}
-		else
-		{
-			curip += tmp;
-		}
+
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ctx.ip-1));
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground( QColor(255,184,107) );
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+		m_asm->setExtraSelections( extras );
+
+		char buf[100];
+		dsb_nid_toStr(m_ctx.result, buf, 100);
+		m_result->setText(QString("Result = %1").arg(buf));
 
 		//Update register table.
 		for (int i=0; i<16; i++)
 		{
-			dsb_nid_toStr(&reg[i],buf,100);
+			dsb_nid_toStr(&m_ctx.reg[i],buf,100);
 			item = new QTableWidgetItem(buf);
 			m_regs->setItem(i,0,item);
 		}

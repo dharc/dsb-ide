@@ -35,14 +35,23 @@ either expressed or implied, of the FreeBSD Project.
 #include "asmsyntax.h"
 
 static const char *keywords[] = {
-		"CONST",
+		"LOAD",
+		"load",
 		"READ",
+		"read",
 		"JUMP",
+		"jump",
 		"RET",
+		"ret",
 		"JEQ",
+		"jeq",
 		"JNEQ",
+		"jneq"
 		"WRITE",
+		"write",
 		"COPY",
+		"copy",
+		"data",
 		0
 };
 
