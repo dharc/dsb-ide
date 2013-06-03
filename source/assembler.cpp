@@ -45,6 +45,8 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QTableWidget>
 #include <qt4/QtGui/QSplitter>
 #include <qt4/QtGui/QLabel>
+#include <qt4/QtGui/QFileDialog>
+#include <qt4/QtCore/QTextStream>
 #include <iostream>
 
 Assembler::Assembler()
@@ -62,8 +64,10 @@ Assembler::Assembler()
 	m_bar->addAction(QIcon(":/icons/table_edit.png"),"Edit Object");
 	m_bar->addAction(QIcon(":/icons/table_save.png"),"Save Object");
 	m_bar->addSeparator();
-	m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Run");
-	m_bar->addAction(QIcon(":/icons/bug.png"),"Debug");
+	m_play = m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Run");
+	m_debug = m_bar->addAction(QIcon(":/icons/bug.png"),"Debug");
+	m_step = m_bar->addAction(QIcon(":/icons/resultset_next.png"),"Step");
+	m_step->setEnabled(false);
 
 	mainlayout->addWidget(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
@@ -108,20 +112,119 @@ void Assembler::toolclick(QAction *a)
 	if (a->text() == "New")
 	{
 		m_asm->clear();
+		m_running = false;
+	}
+	else if (a->text() == "Open")
+	{
+		load_asm();
+	}
+	else if (a->text() == "Save")
+	{
+		save_asm();
 	}
 	else if (a->text() == "Run")
 	{
-		QTableWidgetItem *item;
-		m_ctx.ip = 0;
-		m_ctx.timeout = 10000;
+		//m_debug->setEnabled(false);
+		start();
+		//m_debug->setEnabled(true);
+	}
+	else if (a->text() == "Stop")
+	{
+		m_play->setIcon(QIcon(":/icons/control_play_blue.png"));
+		m_play->setText("Play");
+		m_step->setEnabled(false);
+		m_debug->setEnabled(true);
+		stop();
+	}
+	else if (a->text() == "Debug")
+	{
+		m_debug->setEnabled(false);
+		m_play->setIcon(QIcon(":/icons/control_stop_blue.png"));
+		m_play->setText("Stop");
+		m_step->setEnabled(true);
+		start_debug();
+	}
+	else if (a->text() == "Step")
+	{
+		step_debug();
+	}
+}
 
-		m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
-		dsb_vm_interpret_ctx(&m_ctx);
+void Assembler::start_debug()
+{
+	int ret;
+	m_ctx.timeout = 1;
+	int line=0;
+	int lip;
+
+	int ip = 0;
+	struct VMLabel *labels = new VMLabel[MAX_LABELS];
+	const char *source = m_asm->toPlainText().toAscii().constData();
+
+	//For every line
+	while(1)
+	{
+		lip = ip;
+		dsb_assemble_line(labels,source,m_ctx.code,&ip);
+		//Store which line corresponds to each instructions.
+		m_ipline[lip] = line++;
+		lip = ip;
+		//Move to next line if there is one.
+		source = strchr(source,'\n');
+		if (source == 0) break;
+		source++;
+	}
+
+	delete [] labels;
+
+	if (m_running == false)
+	{
+		m_ctx.ip = 0;
+		m_running = true;
+		dsb_nid_null(m_ctx.result);
+	}
+
+	QTextEdit::ExtraSelection highlight;
+	highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ipline[0]));
+	highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+	highlight.format.setBackground( QColor(255,184,107) );
+
+	QList<QTextEdit::ExtraSelection> extras;
+	extras << highlight;
+	m_asm->setExtraSelections( extras );
+}
+
+void Assembler::step_debug()
+{
+	int ret;
+	QTableWidgetItem *item;
+	m_ctx.timeout = 1;
+
+	ret = dsb_vm_interpret_ctx(&m_ctx);
+
+	if (ret == -1) {
+		m_play->setIcon(QIcon(":/icons/control_play_blue.png"));
+		m_play->setText("Play");
+		m_step->setEnabled(false);
+		m_debug->setEnabled(true);
+		stop();
+		m_ctx.ip++;
 
 		char buf[100];
 		dsb_nid_toStr(m_ctx.result, buf, 100);
 		m_result->setText(QString("Result = %1").arg(buf));
 
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_asm->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, false);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+		m_asm->setExtraSelections( extras );
+	}
+	else
+	{
+		char buf[100];
 		//Update register table.
 		for (int i=0; i<16; i++)
 		{
@@ -129,48 +232,64 @@ void Assembler::toolclick(QAction *a)
 			item = new QTableWidgetItem(buf);
 			m_regs->setItem(i,0,item);
 		}
-	}
-	else if (a->text() == "Debug")
-	{
-		QTableWidgetItem *item;
-		int ret;
-		m_ctx.timeout = 1;
-
-		if (m_running == false)
-		{
-			m_ctx.ip = 0;
-			m_running = true;
-			dsb_nid_null(m_ctx.result);
-		}
-
-		m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
-		ret = dsb_vm_interpret_ctx(&m_ctx);
-
-		if (ret == -1) {
-			m_running = false;
-			m_ctx.ip++;
-		}
 
 		QTextEdit::ExtraSelection highlight;
-		highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ctx.ip-1));
+		highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ipline[m_ctx.ip]));
 		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
 		highlight.format.setBackground( QColor(255,184,107) );
 
 		QList<QTextEdit::ExtraSelection> extras;
 		extras << highlight;
 		m_asm->setExtraSelections( extras );
+	}
+}
 
-		char buf[100];
-		dsb_nid_toStr(m_ctx.result, buf, 100);
-		m_result->setText(QString("Result = %1").arg(buf));
+void Assembler::save_asm()
+{
+	QString filename = QFileDialog::getSaveFileName(this,"Save Assembly",".","DSB Assembly (*.dsba)");
+	QFile file(filename);
+	if (file.open(QFile::WriteOnly | QFile::Text))
+	{
+		QTextStream s(&file);
+		s << m_asm->toPlainText();
+	}
+}
 
-		//Update register table.
-		for (int i=0; i<16; i++)
-		{
-			dsb_nid_toStr(&m_ctx.reg[i],buf,100);
-			item = new QTableWidgetItem(buf);
-			m_regs->setItem(i,0,item);
-		}
+void Assembler::load_asm()
+{
+	QString filename = QFileDialog::getOpenFileName(this,"Open Assembly",".","DSB Assembly (*.dsba)");
+	QFile file(filename);
+	if (file.open(QFile::ReadOnly | QFile::Text))
+	{
+		QTextStream s(&file);
+		m_asm->setPlainText(s.readAll());
+	}
+}
+
+void Assembler::stop()
+{
+	m_running = false;
+}
+
+void Assembler::start()
+{
+	QTableWidgetItem *item;
+	m_ctx.ip = 0;
+	m_ctx.timeout = 10000;
+
+	m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
+	dsb_vm_interpret_ctx(&m_ctx);
+
+	char buf[100];
+	dsb_nid_toStr(m_ctx.result, buf, 100);
+	m_result->setText(QString("Result = %1").arg(buf));
+
+	//Update register table.
+	for (int i=0; i<16; i++)
+	{
+		dsb_nid_toStr(&m_ctx.reg[i],buf,100);
+		item = new QTableWidgetItem(buf);
+		m_regs->setItem(i,0,item);
 	}
 }
 

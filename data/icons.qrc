@@ -22,5 +22,7 @@
 		<file>icons/bug.png</file>
 		<file>icons/table_edit.png</file>
 		<file>icons/table_save.png</file>
+		<file>icons/resultset_next.png</file>
+		<file>icons/control_stop_blue.png</file>
 	</qresource>
 </RCC>

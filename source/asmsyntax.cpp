@@ -52,6 +52,7 @@ static const char *keywords[] = {
 		"COPY",
 		"copy",
 		"data",
+		"inc",
 		0
 };
 

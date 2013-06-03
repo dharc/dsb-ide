@@ -57,9 +57,20 @@ private:
 	QTextEdit *m_asm;
 	QTableWidget *m_regs;
 	QLabel *m_result;
+	QAction *m_play;
+	QAction *m_debug;
+	QAction *m_step;
 
 	bool m_running;
 	struct VMContext m_ctx;
+	int m_ipline[1000];
+
+	void start_debug();
+	void step_debug();
+	void save_asm();
+	void load_asm();
+	void stop();
+	void start();
 
 public slots:
 	void toolclick(QAction *);
