@@ -37,6 +37,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/assembler.h"
 #include "dsb/vm.h"
 #include "dsb/nid.h"
+#include "dsb/array.h"
+#include "dsb/errors.h"
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
 #include <qt4/QtGui/QAction>
@@ -44,10 +46,57 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QTextEdit>
 #include <qt4/QtGui/QTableWidget>
 #include <qt4/QtGui/QSplitter>
+#include <qt4/QtGui/QLineEdit>
+#include <qt4/QtGui/QPushButton>
 #include <qt4/QtGui/QLabel>
 #include <qt4/QtGui/QFileDialog>
 #include <qt4/QtCore/QTextStream>
 #include <iostream>
+
+SaveObject::SaveObject(Assembler *a)
+	: QWidget(0,Qt::Dialog)
+{
+	m_asm = a;
+
+	QVBoxLayout *mainlayout = new QVBoxLayout();
+	setLayout(mainlayout);
+
+	m_obj = new QLineEdit();
+	m_obj->setAutoFillBackground(true);
+	mainlayout->addWidget(m_obj);
+
+	QHBoxLayout *buttonlayout = new QHBoxLayout();
+	mainlayout->addLayout(buttonlayout);
+	m_save = new QPushButton("Save");
+	buttonlayout->addWidget(m_save);
+	m_cancel = new QPushButton("Cancel");
+	buttonlayout->addWidget(m_cancel);
+
+	setWindowTitle("Save Script to Object");
+
+	connect(m_save, SIGNAL(clicked()), this, SLOT(saveclicked()));
+	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
+}
+
+SaveObject::~SaveObject()
+{
+
+}
+
+void SaveObject::saveclicked()
+{
+	NID_t n;
+	if (dsb_nid_fromStr(m_obj->text().toAscii().constData(),&n) == 0)
+	{
+		m_asm->saveObject(n);
+		hide();
+	}
+}
+
+void SaveObject::cancelclicked()
+{
+	hide();
+}
 
 Assembler::Assembler()
  : QWidget()
@@ -77,19 +126,33 @@ Assembler::Assembler()
 	m_asm->setFont(QFont("Courier New", 10));
 	Syntax *syn = new Syntax(m_asm->document());
 	split->addWidget(m_asm);
+
+	m_tabs = new QTabWidget();
+
 	m_regs = new QTableWidget();
 	m_regs->setColumnCount(1);
 	m_regs->setRowCount(16);
 	QStringList headers;
 	headers.append("Registers");
 	m_regs->setHorizontalHeaderLabels(headers);
-	split->addWidget(m_regs);
+	m_tabs->addTab(m_regs, "Registers");
+
+	m_mem = new QTableWidget();
+	m_mem->setColumnCount(1);
+	m_mem->setRowCount(16);
+	headers.clear();
+	headers.append("Memory");
+	m_mem->setHorizontalHeaderLabels(headers);
+	m_tabs->addTab(m_mem, "Memory");
+
+	split->addWidget(m_tabs);
 	QList<int> sizes;
 	sizes.append(200);
 	sizes.append(20);
 	split->setSizes(sizes);
 
 	m_result = new QLabel("Result = null");
+	m_result->setMaximumHeight(50);
 	mainlayout->addWidget(m_result);
 
 	setWindowTitle("DSB Assembler");
@@ -99,6 +162,8 @@ Assembler::Assembler()
 	m_running = false;
 	m_ctx.code = new NID_t[1000];
 	m_ctx.result = new NID_t;
+
+	m_saveobj = new SaveObject(this);
 }
 
 Assembler::~Assembler()
@@ -106,6 +171,11 @@ Assembler::~Assembler()
 
 }
 
+void Assembler::saveObject(const NID_t &n)
+{
+	m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
+	dsb_array_write(m_ctx.code,m_ctx.codesize,&n);
+}
 
 void Assembler::toolclick(QAction *a)
 {
@@ -148,6 +218,10 @@ void Assembler::toolclick(QAction *a)
 	{
 		step_debug();
 	}
+	else if (a->text() == "Save Object")
+	{
+		m_saveobj->show();
+	}
 }
 
 void Assembler::start_debug()
@@ -159,6 +233,8 @@ void Assembler::start_debug()
 	int ip = 0;
 	struct VMLabel *labels = new VMLabel[MAX_LABELS];
 	const char *source = m_asm->toPlainText().toAscii().constData();
+
+	dsb_assemble_labels(labels,source);
 
 	//For every line
 	while(1)
@@ -172,6 +248,19 @@ void Assembler::start_debug()
 		source = strchr(source,'\n');
 		if (source == 0) break;
 		source++;
+	}
+
+	m_ctx.codesize = ip;
+	m_mem->setRowCount(ip);
+
+	//Update memory table
+	char buf[100];
+	QTableWidgetItem *item;
+	for (int i=0; i<m_ctx.codesize; i++)
+	{
+		dsb_nid_toStr(&m_ctx.code[i],buf,100);
+		item = new QTableWidgetItem(buf);
+		m_mem->setItem(i,0,item);
 	}
 
 	delete [] labels;
@@ -230,6 +319,14 @@ void Assembler::step_debug()
 			dsb_nid_toStr(&m_ctx.reg[i],buf,100);
 			item = new QTableWidgetItem(buf);
 			m_regs->setItem(i,0,item);
+		}
+
+		//Update memory table
+		for (int i=0; i<m_ctx.codesize; i++)
+		{
+			dsb_nid_toStr(&m_ctx.code[i],buf,100);
+			item = new QTableWidgetItem(buf);
+			m_mem->setItem(i,0,item);
 		}
 
 		QTextEdit::ExtraSelection highlight;

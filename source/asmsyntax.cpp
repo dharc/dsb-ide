@@ -143,7 +143,7 @@ void Syntax::highlightBlock ( const QString & text )
 
 		case ':':	beg = pos;
 					pos++;
-					while (text2[pos] != 0 && text2[pos] != ' ' && text2[pos] != '\n') pos++;
+					while (text2[pos] != 0 && text2[pos] != ' ' && text2[pos] != '\n' && text2[pos] != '\t' && text2[pos] != '+' && text2[pos] != '-') pos++;
 					setFormat(beg,pos-beg,font_label);
 					break;
 

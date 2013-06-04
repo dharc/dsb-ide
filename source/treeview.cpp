@@ -1,7 +1,7 @@
 /*
- * assember.h
+ * treeview.cpp
  *
- *  Created on: 31 May 2013
+ *  Created on: 4 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,78 +32,9 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDEASSEMBLER_H_
-#define IDEASSEMBLER_H_
 
-#include <qt4/QtGui/QWidget>
-#include "dsb/vm.h"
 
-class QAction;
-class QToolBar;
-class QTextEdit;
-class QTableWidget;
-class QLabel;
-class QTabWidget;
-class QPushButton;
-class QLineEdit;
 
-class Assembler;
 
-class SaveObject : public QWidget
-{
-	Q_OBJECT
 
-public:
-	SaveObject(Assembler *a);
-	~SaveObject();
 
-private:
-	QLineEdit *m_obj;
-	QPushButton *m_save;
-	QPushButton *m_cancel;
-	Assembler *m_asm;
-
-public slots:
-	void saveclicked();
-	void cancelclicked();
-};
-
-class Assembler : public QWidget
-{
-	Q_OBJECT
-
-public:
-	Assembler();
-	~Assembler();
-
-	void setObject(const NID_t &obj);
-	void saveObject(const NID_t &obj);
-
-private:
-	QToolBar *m_bar;
-	QTextEdit *m_asm;
-	QTableWidget *m_regs;
-	QTableWidget *m_mem;
-	QLabel *m_result;
-	QAction *m_play;
-	QAction *m_debug;
-	QAction *m_step;
-	QTabWidget *m_tabs;
-	SaveObject *m_saveobj;
-
-	bool m_running;
-	struct VMContext m_ctx;
-	int m_ipline[1000];
-
-	void start_debug();
-	void step_debug();
-	void save_asm();
-	void load_asm();
-	void stop();
-	void start();
-
-public slots:
-	void toolclick(QAction *);
-};
-
-#endif /* ASSEMBER_H_ */
