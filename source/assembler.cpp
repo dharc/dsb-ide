@@ -152,7 +152,6 @@ void Assembler::toolclick(QAction *a)
 
 void Assembler::start_debug()
 {
-	int ret;
 	m_ctx.timeout = 1;
 	int line=0;
 	int lip;

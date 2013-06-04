@@ -52,6 +52,8 @@ public:
 	Assembler();
 	~Assembler();
 
+	void setObject(const NID_t &obj);
+
 private:
 	QToolBar *m_bar;
 	QTextEdit *m_asm;

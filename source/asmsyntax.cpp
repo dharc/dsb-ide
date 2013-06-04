@@ -141,6 +141,12 @@ void Syntax::highlightBlock ( const QString & text )
 					setFormat(beg,pos-beg,font_comment);
 					break;
 
+		case ':':	beg = pos;
+					pos++;
+					while (text2[pos] != 0 && text2[pos] != ' ' && text2[pos] != '\n') pos++;
+					setFormat(beg,pos-beg,font_label);
+					break;
+
 		default:	kword = keywords[0];
 					i = 0;
 					while (kword != 0)
