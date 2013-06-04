@@ -169,6 +169,16 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		item->setExpanded(true);
 		break;
 
+	case DSBNET_ROOT:
+		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_ROOT")));
+		item->setIcon(0,QIcon(":/icons/email_open.png"));
+		dsb_nid_unpack((const char*)data,&evt.d1);
+		dsb_nid_toStr(&(evt.d1),buf,100);
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Root")) << QString(buf));
+		m_tree->insertTopLevelItem(0,item);
+		item->setExpanded(true);
+		break;
+
 	case DSBNET_ERROR:
 			item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_ERROR")));
 			item->setIcon(0,QIcon(":/icons/email_open.png"));

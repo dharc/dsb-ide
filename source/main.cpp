@@ -87,6 +87,12 @@ int net_cb_error(void *sock, void *data)
 	return 0;
 }
 
+int net_cb_root(void *sock, void *data)
+{
+	msglogger->addMessage(DSBNET_ROOT,data);
+	return SUCCESS;
+}
+
 int net_cb_debugevent(void *sock, void *data)
 {
 	msglogger->addMessage(DSBNET_DEBUGEVENT,data);
@@ -101,6 +107,7 @@ int main(int argc, char *argv[])
 
 	dsb_net_callback(DSBNET_EVENTRESULT,net_cb_result);
 	dsb_net_callback(DSBNET_ERROR,net_cb_error);
+	dsb_net_callback(DSBNET_ROOT,net_cb_root);
 
 	msglogger = new MessageLogger();
 	new ConnectDialog();
