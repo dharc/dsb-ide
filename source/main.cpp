@@ -42,6 +42,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"
+#include "dsb/names.h"
+#include "dsb/globals.h"
 #include "dsb/common.h"
 #include <iostream>
 
@@ -89,7 +91,16 @@ int net_cb_error(void *sock, void *data)
 
 int net_cb_base(void *sock, void *data)
 {
+	int count;
+
 	msglogger->addMessage(DSBNET_BASE,data);
+
+	//Update roots
+	count = dsb_nid_unpack((const char*)data,&Root);
+	dsb_names_update("root",&Root);
+	dsb_nid_unpack(&(((const char*)data)[count]),&PRoot);
+	dsb_names_update("proot",&PRoot);
+
 	return SUCCESS;
 }
 
