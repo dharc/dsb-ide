@@ -46,6 +46,7 @@ class QLabel;
 class QTabWidget;
 class QPushButton;
 class QLineEdit;
+class QCheckBox;
 
 class Assembler;
 
@@ -59,6 +60,7 @@ public:
 
 private:
 	QLineEdit *m_obj;
+	QCheckBox *m_source;
 	QPushButton *m_save;
 	QPushButton *m_cancel;
 	Assembler *m_asm;
@@ -77,7 +79,7 @@ public:
 	~Assembler();
 
 	void setObject(const NID_t &obj);
-	void saveObject(const NID_t &obj);
+	void saveObject(const NID_t &obj, bool incsrc);
 
 private:
 	QToolBar *m_bar;

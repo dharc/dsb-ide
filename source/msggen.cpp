@@ -246,6 +246,9 @@ void MessageGenerator::send_sendevent()
 	case EVENT_GET:
 		e->res = &dummy;
 		break;
+	case EVENT_ALLOCATE:
+		e->res = &dummy;
+		break;
 	case EVENT_DEFINE:
 		e->eval = m_table->item(3,1)->text().toUInt();
 		dsb_nid_fromStr(m_table->item(4,1)->text().toAscii().constData(), &e->def);

@@ -133,7 +133,14 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		//Unpack the event
 		dsb_event_unpack((const char*)data,&evt);
 		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_SENDEVENT")));
-		item->setIcon(0,QIcon(":/icons/email_go.png"));
+		if (dsb_nid_isLocal(&evt.d1) == 1)
+		{
+			item->setIcon(0,QIcon(":/icons/email_open.png"));
+		}
+		else
+		{
+			item->setIcon(0,QIcon(":/icons/email_go.png"));
+		}
 		item2 = new QTreeWidgetItem(item, QStringList(QString("Type")) << QString("0x%1").arg(evt.type,0,16));
 		dsb_nid_toStr(&(evt.d1),buf,100);
 		item2 = new QTreeWidgetItem(item, QStringList(QString("Dest1")) << QString(buf));
@@ -169,12 +176,15 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		item->setExpanded(true);
 		break;
 
-	case DSBNET_ROOT:
-		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_ROOT")));
+	case DSBNET_BASE:
+		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_BASE")));
 		item->setIcon(0,QIcon(":/icons/email_open.png"));
+		data += dsb_nid_unpack((const char*)data,&evt.d1);
+		dsb_nid_toStr(&(evt.d1),buf,100);
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Volatile Root")) << QString(buf));
 		dsb_nid_unpack((const char*)data,&evt.d1);
 		dsb_nid_toStr(&(evt.d1),buf,100);
-		item2 = new QTreeWidgetItem(item, QStringList(QString("Root")) << QString(buf));
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Persistent Root")) << QString(buf));
 		m_tree->insertTopLevelItem(0,item);
 		item->setExpanded(true);
 		break;

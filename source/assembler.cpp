@@ -39,6 +39,9 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/nid.h"
 #include "dsb/array.h"
 #include "dsb/errors.h"
+#include "dsb/wrap.h"
+#include "dsb/globals.h"
+#include "dsb/string.h"
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
 #include <qt4/QtGui/QAction>
@@ -51,6 +54,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QLabel>
 #include <qt4/QtGui/QFileDialog>
 #include <qt4/QtCore/QTextStream>
+#include <qt4/QtGui/QCheckBox>
 #include <iostream>
 
 SaveObject::SaveObject(Assembler *a)
@@ -64,6 +68,9 @@ SaveObject::SaveObject(Assembler *a)
 	m_obj = new QLineEdit();
 	m_obj->setAutoFillBackground(true);
 	mainlayout->addWidget(m_obj);
+
+	m_source = new QCheckBox("Include source");
+	mainlayout->addWidget(m_source);
 
 	QHBoxLayout *buttonlayout = new QHBoxLayout();
 	mainlayout->addLayout(buttonlayout);
@@ -88,7 +95,7 @@ void SaveObject::saveclicked()
 	NID_t n;
 	if (dsb_nid_fromStr(m_obj->text().toAscii().constData(),&n) == 0)
 	{
-		m_asm->saveObject(n);
+		m_asm->saveObject(n,m_source->isChecked());
 		hide();
 	}
 }
@@ -171,8 +178,23 @@ Assembler::~Assembler()
 
 }
 
-void Assembler::saveObject(const NID_t &n)
+void Assembler::saveObject(const NID_t &n, bool incsrc)
 {
+	if (incsrc)
+	{
+		NID_t str;
+		NID_t i;
+
+		dsb_iton(100,&i);
+		dsb_get(&n,&i,&str);
+		if (dsb_nid_eq(&str,&Null) == 1)
+		{
+			dsb_new(&n,&str);
+		}
+
+		dsb_string_cton(&str,m_asm->toPlainText().toAscii().constData());
+	}
+
 	m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
 	dsb_array_write(m_ctx.code,m_ctx.codesize,&n);
 }

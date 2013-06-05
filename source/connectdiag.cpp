@@ -111,7 +111,6 @@ void ConnectDialog::connectclicked()
 	}
 	else
 	{
-		dsb_net_send_login(hostsock, "root", "root");
 		hide();
 	}
 }
