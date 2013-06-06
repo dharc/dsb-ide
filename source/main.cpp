@@ -97,9 +97,11 @@ int net_cb_base(void *sock, void *data)
 
 	//Update roots
 	count = dsb_nid_unpack((const char*)data,&Root);
-	dsb_names_update("root",&Root);
+	//dsb_names_update("root",&Root);
 	dsb_nid_unpack(&(((const char*)data)[count]),&PRoot);
-	dsb_names_update("proot",&PRoot);
+	//dsb_names_update("proot",&PRoot);
+
+	dsb_names_rebuild();
 
 	return SUCCESS;
 }
