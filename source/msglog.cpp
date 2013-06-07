@@ -39,6 +39,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"
 #include "dsb/errors.h"
+#include "dsb/names.h"
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -66,6 +67,9 @@ MessageLogger::MessageLogger()
 	nettimer->start(20);
 
 	m_gen = new MessageGenerator();
+
+	m_paused = true;
+	m_namesrebuild = false;
 }
 
 MessageLogger::~MessageLogger()
@@ -78,7 +82,7 @@ void MessageLogger::make_toolbar(QLayout *l)
 	m_bar = new QToolBar();
 	m_bar->addAction(QIcon(":/icons/add.png"),"Send");
 	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
-	m_bar->addAction(QIcon(":/icons/control_pause_blue.png"),"Pause");
+	m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Record");
 	l->addWidget(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
@@ -98,6 +102,8 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 	QTreeWidgetItem *item2;
 	Event_t evt;
 	char buf[100];
+
+	if (m_paused == true) return;
 
 	switch(type)
 	{
@@ -157,6 +163,9 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		case EVENT_GET:
 			item2 = new QTreeWidgetItem(item, QStringList(QString("ID")) << QString("%1").arg(evt.resid));
 			break;
+		case EVENT_ALLOCATE:
+			item2 = new QTreeWidgetItem(item, QStringList(QString("ID")) << QString("%1").arg(evt.resid));
+			break;
 		default: break;
 		}
 
@@ -211,9 +220,24 @@ void MessageLogger::toolclick(QAction *a)
 		m_tree->clear();
 
 	}
+	else if (a->text() == "Record")
+	{
+		a->setIcon(QIcon(":/icons/control_pause_blue.png"));
+		m_paused = !m_paused;
+	}
+}
+
+void MessageLogger::delayedNamesRebuild()
+{
+	m_namesrebuild = true;
 }
 
 void MessageLogger::netpoll()
 {
 	dsb_net_poll(0);
+	if (m_namesrebuild == true)
+	{
+		m_namesrebuild = false;
+		dsb_names_rebuild();
+	}
 }

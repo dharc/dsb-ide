@@ -55,13 +55,19 @@ extern "C"
 int dsb_send(Event_t *evt, int async)
 {
 	int res;
-	char buf[100];
+	char buf[200];
+
 	//Record the event.
-	res = dsb_net_send_event(hostsock, evt, async);
 	dsb_event_pack(evt,buf,100);
 	msglogger->addMessage(DSBNET_SENDEVENT,buf);
 
-	//TODO free the event if it needs to be freed.
+	res = dsb_net_send_event(hostsock, evt, async);
+
+
+	if (((evt->type >> 8) != 0x1) && ((evt->flags & EVTFLAG_FREE) != 0))
+	{
+		dsb_event_free(evt);
+	}
 
 	return res;
 }
@@ -101,7 +107,9 @@ int net_cb_base(void *sock, void *data)
 	dsb_nid_unpack(&(((const char*)data)[count]),&PRoot);
 	//dsb_names_update("proot",&PRoot);
 
-	dsb_names_rebuild();
+
+	//dsb_names_rebuild();
+	msglogger->delayedNamesRebuild();
 
 	return SUCCESS;
 }
@@ -128,6 +136,7 @@ int main(int argc, char *argv[])
 	dsb_net_callback(DSBNET_ERROR,net_cb_error);
 	dsb_net_callback(DSBNET_BASE,net_cb_base);
 	dsb_net_callback(DSBNET_SENDEVENT,net_cb_event);
+	dsb_net_callback(DSBNET_DEBUGEVENT,net_cb_debugevent);
 
 	msglogger = new MessageLogger();
 	new ConnectDialog();

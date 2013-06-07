@@ -51,11 +51,14 @@ public:
 	~MessageLogger();
 
 	void addMessage(unsigned short type, void *data);
+	void delayedNamesRebuild();
 
 private:
 	QTreeWidget *m_tree;
 	QToolBar *m_bar;
 	MessageGenerator *m_gen;
+	bool m_paused;
+	bool m_namesrebuild;
 
 	void make_tree(QLayout *);
 	void make_toolbar(QLayout *);

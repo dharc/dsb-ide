@@ -111,6 +111,7 @@ void ConnectDialog::connectclicked()
 	}
 	else
 	{
+		//dsb_net_send_debugger(hostsock,NET_DEBUG_QUEUES);
 		hide();
 	}
 }
