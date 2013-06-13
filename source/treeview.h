@@ -40,6 +40,52 @@ either expressed or implied, of the FreeBSD Project.
 typedef struct NID NID_t;
 class QTreeWidget;
 class QTreeWidgetItem;
+class QToolBar;
+class QLineEdit;
+class QPushButton;
+
+class AddObject : public QWidget
+{
+	Q_OBJECT
+
+public:
+	AddObject();
+	~AddObject();
+
+	void showAddObject(QTreeWidgetItem *item);
+
+private:
+	QLineEdit *m_attr;
+	QLineEdit *m_value;
+	QPushButton *m_save;
+	QPushButton *m_cancel;
+	QTreeWidgetItem *m_item;
+
+public slots:
+	void addclicked();
+	void cancelclicked();
+};
+
+class EditObject : public QWidget
+{
+	Q_OBJECT
+
+public:
+	EditObject();
+	~EditObject();
+
+	void showEditObject(QTreeWidgetItem *item);
+
+private:
+	QLineEdit *m_value;
+	QPushButton *m_save;
+	QPushButton *m_cancel;
+	QTreeWidgetItem *m_item;
+
+public slots:
+	void editclicked();
+	void cancelclicked();
+};
 
 class TreeView : public QWidget
 {
@@ -53,10 +99,17 @@ public:
 
 private:
 	QTreeWidget *m_tree;
+	QToolBar *m_bar;
+	AddObject *m_addobj;
+	EditObject *m_editobj;
+
+	void make_toolbar(QLayout *);
 
 public slots:
 	void expanded(QTreeWidgetItem *item);
 	void collapsed(QTreeWidgetItem *item);
+	void toolclick(QAction *);
+	void doubleclick(QTreeWidgetItem *item, int col);
 };
 
 #endif /* TREEVIEW_H_ */

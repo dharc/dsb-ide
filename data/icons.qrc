@@ -24,5 +24,9 @@
 		<file>icons/table_save.png</file>
 		<file>icons/resultset_next.png</file>
 		<file>icons/control_stop_blue.png</file>
+		<file>icons/delete.png</file>
+		<file>icons/pencil.png</file>
+		<file>icons/tag_blue.png</file>
+		<file>icons/tag_red.png</file>
 	</qresource>
 </RCC>
