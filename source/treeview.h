@@ -38,6 +38,8 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QWidget>
 
 typedef struct NID NID_t;
+class QTreeWidget;
+class QTreeWidgetItem;
 
 class TreeView : public QWidget
 {
@@ -47,7 +49,7 @@ public:
 	TreeView();
 	~TreeView();
 
-	void setRoot(NID_t &n);
+	void setRoot(const NID_t &n);
 
 private:
 	QTreeWidget *m_tree;

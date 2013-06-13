@@ -32,9 +32,110 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
+#include "treeview.h"
 
+#include <dsb/nid.h>
+#include <dsb/iterator.h>
+#include <dsb/wrap.h>
+#include <qt4/QtGui/QTreeWidget>
+#include <qt4/QtGui/QHBoxLayout>
+#include <qt4/QtGui/QVBoxLayout>
 
+Q_DECLARE_METATYPE(NID);
 
+TreeView::TreeView()
+ : QWidget()
+{
+	QVBoxLayout *mainlayout = new QVBoxLayout();
+	setLayout(mainlayout);
 
+	m_tree = new QTreeWidget();
+	m_tree->setColumnCount(2);
+	m_tree->setHeaderLabels(QStringList(QString("Object")) << QString("Value"));
+	mainlayout->addWidget(m_tree);
+
+	setWindowTitle("Tree Browser");
+	resize(600,400);
+	show();
+
+	connect(m_tree,SIGNAL(itemCollapsed(QTreeWidgetItem *)),this,SLOT(collapsed(QTreeWidgetItem *)));
+	connect(m_tree,SIGNAL(itemExpanded(QTreeWidgetItem *)),this,SLOT(expanded(QTreeWidgetItem *)));
+}
+
+TreeView::~TreeView()
+{
+
+}
+
+void TreeView::setRoot(const NID_t &root)
+{
+	QTreeWidgetItem *item;
+	QTreeWidgetItem *item2;
+
+	item = new QTreeWidgetItem();
+	item->setText(0,"root");
+	item->setData(1,Qt::UserRole,QVariant::fromValue(root));
+	m_tree->insertTopLevelItem(0,item);
+
+	struct DSBIterator it;
+	const NID_t *p;
+	dsb_iterator_begin(&it,&root);
+	p = dsb_iterator_next(&it);
+	while (p != 0)
+	{
+		char buf[100];
+		NID_t v;
+		dsb_nid_toStr(p,buf,100);
+		item2 = new QTreeWidgetItem(item);
+		item2->setText(0,buf);
+		item2->setData(0,Qt::UserRole,QVariant::fromValue(*p));
+		p = dsb_iterator_next(&it);
+	}
+	dsb_iterator_end(&it);
+}
+
+void TreeView::expanded(QTreeWidgetItem *item)
+{
+	QTreeWidgetItem *item2;
+	QTreeWidgetItem *item3;
+	NID_t key;
+	NID_t root;
+	NID_t value;
+	char buf[100];
+
+	root = item->data(1,Qt::UserRole).value<NID>();
+
+	//Need to loop over all children and add their children
+	for (int i=0; i<item->childCount(); i++)
+	{
+		item2 = item->child(i);
+		key = item2->data(0,Qt::UserRole).value<NID>();
+
+		dsb_get(&root,&key,&value);
+		dsb_nid_toStr(&value,buf,100);
+		item2->setText(1,buf);
+		item2->setData(1,Qt::UserRole,QVariant::fromValue(value));
+
+		//Now generate partial children.
+		struct DSBIterator it;
+		const NID_t *p;
+		dsb_iterator_begin(&it,&value);
+		p = dsb_iterator_next(&it);
+		while (p != 0)
+		{
+			dsb_nid_toStr(p,buf,100);
+			item3 = new QTreeWidgetItem(item2);
+			item3->setText(0,buf);
+			item3->setData(0,Qt::UserRole,QVariant::fromValue(*p));
+			p = dsb_iterator_next(&it);
+		}
+		dsb_iterator_end(&it);
+	}
+}
+
+void TreeView::collapsed(QTreeWidgetItem *item)
+{
+
+}
 
 

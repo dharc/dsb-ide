@@ -37,6 +37,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "connectdiag.h"
 #include "msglog.h"
 #include "assembler.h"
+#include "treeview.h"
 #include "dsb/event.h"
 #include "dsb/wrap.h"
 #include "dsb/net.h"
@@ -48,6 +49,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <iostream>
 
 MessageLogger *msglogger = 0;
+TreeView *treeview = 0;
 void *hostsock = 0;
 
 extern "C"
@@ -141,6 +143,7 @@ int main(int argc, char *argv[])
 	msglogger = new MessageLogger();
 	new ConnectDialog();
 	new Assembler();
+	treeview = new TreeView();
 
 	QApplication::exec();
 

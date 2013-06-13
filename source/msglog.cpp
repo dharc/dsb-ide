@@ -35,11 +35,14 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "msglog.h"
 #include "msggen.h"
+#include "treeview.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"
 #include "dsb/errors.h"
 #include "dsb/names.h"
+#include "dsb/iterator.h"
+#include "dsb/globals.h"
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -47,6 +50,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QToolBar>
 #include <qt4/QtCore/QTimer>
 
+#include <iostream>
 
 MessageLogger::MessageLogger()
 	: QWidget()
@@ -232,6 +236,8 @@ void MessageLogger::delayedNamesRebuild()
 	m_namesrebuild = true;
 }
 
+extern TreeView *treeview;
+
 void MessageLogger::netpoll()
 {
 	dsb_net_poll(0);
@@ -239,5 +245,7 @@ void MessageLogger::netpoll()
 	{
 		m_namesrebuild = false;
 		dsb_names_rebuild();
+
+		treeview->setRoot(Root);
 	}
 }
