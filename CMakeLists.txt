@@ -23,9 +23,9 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-D_DEBUG -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
 
-set(DSBIDESRC source/main.cpp source/connectdiag.cpp source/msglog.cpp source/msggen.cpp source/assembler.cpp source/asmsyntax.cpp source/treeview.cpp)
-set(DSBIDEHEADERS source/connectdiag.h source/msglog.h source/msggen.h source/assembler.h source/treeview.h)
-set(DSBIDERCCS data/icons.qrc)
+set(DSBIDESRC source/main.cpp source/connectdiag.cpp source/msglog.cpp source/msggen.cpp source/assembler.cpp source/asmsyntax.cpp source/treeview.cpp source/ide.cpp)
+set(DSBIDEHEADERS source/connectdiag.h source/msglog.h source/msggen.h source/assembler.h source/treeview.h source/ide.h)
+set(DSBIDERCCS data/icons.qrc data/splash.qrc)
 
 # configure_file( ${CMAKE_SOURCE_DIR}/common/include/dsb/config.h.in ${CMAKE_BINARY_DIR}/config.h )
 

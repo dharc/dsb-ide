@@ -41,10 +41,12 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/string.h"
+#include "ide.h"
 
 #include <iostream>
 
 extern void *hostsock;
+extern DSBIde *ide;
 
 ConnectDialog::ConnectDialog()
 	: QWidget(0, Qt::Dialog)
@@ -69,18 +71,21 @@ ConnectDialog::ConnectDialog()
 	m_host = new QLineEdit();
 	m_host->setAutoFillBackground(true);
 	m_host->setMinimumWidth(200);
+	m_host->setText("localhost");
 	hostlayout->addWidget(m_urllabel);
 	hostlayout->addWidget(m_host);
 
 	m_userlabel = new QLabel("Username:");
 	m_user = new QLineEdit();
 	m_user->setAutoFillBackground(true);
+	m_user->setEnabled(false);
 	userlayout->addWidget(m_userlabel);
 	userlayout->addWidget(m_user);
 
 	m_passlabel = new QLabel("Password:");
 	m_pass = new QLineEdit();
 	m_pass->setAutoFillBackground(true);
+	m_pass->setEnabled(false);
 	passlayout->addWidget(m_passlabel);
 	passlayout->addWidget(m_pass);
 
@@ -90,8 +95,7 @@ ConnectDialog::ConnectDialog()
 	buttonlayout->addWidget(m_cancel);
 
 	setLayout(mainlayout);
-	setWindowTitle("Connect");
-	show();
+	setWindowTitle("Connect DSB");
 
 	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
 	connect(m_ok, SIGNAL(clicked()), this, SLOT(connectclicked()));
@@ -112,7 +116,7 @@ void ConnectDialog::connectclicked()
 	else
 	{
 		//dsb_net_send_debugger(hostsock,NET_DEBUG_QUEUES);
-
+		ide->showSplash();
 		hide();
 	}
 }

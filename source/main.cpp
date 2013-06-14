@@ -38,6 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "msglog.h"
 #include "assembler.h"
 #include "treeview.h"
+#include "ide.h"
 #include "dsb/event.h"
 #include "dsb/wrap.h"
 #include "dsb/net.h"
@@ -48,8 +49,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/common.h"
 #include <iostream>
 
-MessageLogger *msglogger = 0;
-TreeView *treeview = 0;
+DSBIde *ide;
+
 void *hostsock = 0;
 
 extern "C"
@@ -61,7 +62,7 @@ int dsb_send(Event_t *evt, int async)
 
 	//Record the event.
 	dsb_event_pack(evt,buf,100);
-	msglogger->addMessage(DSBNET_SENDEVENT,buf);
+	ide->messageLogger()->addMessage(DSBNET_SENDEVENT,buf);
 
 	res = dsb_net_send_event(hostsock, evt, async);
 
@@ -82,7 +83,7 @@ int net_cb_result(void *sock, void *data)
 
 	dsb_nid_unpack((const char*)((char*)data+sizeof(int)), &res);
 
-	msglogger->addMessage(DSBNET_EVENTRESULT,data);
+	ide->messageLogger()->addMessage(DSBNET_EVENTRESULT,data);
 
 	//Call original event handler.
 	//TODO, should check that this is the current event handler.
@@ -93,7 +94,7 @@ int net_cb_result(void *sock, void *data)
 
 int net_cb_error(void *sock, void *data)
 {
-	msglogger->addMessage(DSBNET_ERROR,data);
+	ide->messageLogger()->addMessage(DSBNET_ERROR,data);
 	return 0;
 }
 
@@ -101,7 +102,7 @@ int net_cb_base(void *sock, void *data)
 {
 	int count;
 
-	msglogger->addMessage(DSBNET_BASE,data);
+	ide->messageLogger()->addMessage(DSBNET_BASE,data);
 
 	//Update roots
 	count = dsb_nid_unpack((const char*)data,&Root);
@@ -111,20 +112,20 @@ int net_cb_base(void *sock, void *data)
 
 
 	//dsb_names_rebuild();
-	msglogger->delayedNamesRebuild();
+	ide->messageLogger()->delayedNamesRebuild();
 
 	return SUCCESS;
 }
 
 int net_cb_debugevent(void *sock, void *data)
 {
-	msglogger->addMessage(DSBNET_DEBUGEVENT,data);
+	ide->messageLogger()->addMessage(DSBNET_DEBUGEVENT,data);
 	return 0;
 }
 
 int net_cb_event(void *sock, void *data)
 {
-	msglogger->addMessage(DSBNET_SENDEVENT,data);
+	ide->messageLogger()->addMessage(DSBNET_SENDEVENT,data);
 	return 0;
 }
 
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
 {
 	QApplication qtapp(argc,argv);
 
+	setenv("DSB_SERIAL","10:00:00:00:00:00",0);
 	dsb_common_init();
 
 	dsb_net_callback(DSBNET_EVENTRESULT,net_cb_result);
@@ -140,10 +142,12 @@ int main(int argc, char *argv[])
 	dsb_net_callback(DSBNET_SENDEVENT,net_cb_event);
 	dsb_net_callback(DSBNET_DEBUGEVENT,net_cb_debugevent);
 
-	msglogger = new MessageLogger();
-	new ConnectDialog();
-	new Assembler();
-	treeview = new TreeView();
+	//msglogger = new MessageLogger();
+	ConnectDialog *cdiag = new ConnectDialog();
+	cdiag->show();
+	//new Assembler();
+	//treeview = new TreeView();
+	ide = new DSBIde();
 
 	QApplication::exec();
 

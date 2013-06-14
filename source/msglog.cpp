@@ -35,7 +35,7 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "msglog.h"
 #include "msggen.h"
-#include "treeview.h"
+#include "ide.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"
@@ -62,7 +62,7 @@ MessageLogger::MessageLogger()
 	make_tree(mainlayout);
 
 	setWindowTitle("Message Log");
-	resize(600,400);
+	//resize(600,400);
 	show();
 
 	//Create the network polling timer.
@@ -105,7 +105,7 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 	QTreeWidgetItem *item;
 	QTreeWidgetItem *item2;
 	Event_t evt;
-	char buf[100];
+	char buf[300];
 
 	if (m_paused == true) return;
 
@@ -136,13 +136,14 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		}
 
 		m_tree->insertTopLevelItem(0,item);
-		item->setExpanded(true);
+		//item->setExpanded(true);
 		break;
 
 	case DSBNET_SENDEVENT:
 		//Unpack the event
 		dsb_event_unpack((const char*)data,&evt);
-		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_SENDEVENT")));
+		dsb_event_pretty(&evt,buf,300);
+		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_SENDEVENT")) << QString(buf));
 		if (dsb_nid_isLocal(&evt.d1) == 1)
 		{
 			item->setIcon(0,QIcon(":/icons/email_open.png"));
@@ -174,19 +175,19 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		}
 
 		m_tree->insertTopLevelItem(0,item);
-		item->setExpanded(true);
+		//item->setExpanded(true);
 		break;
 
 	case DSBNET_EVENTRESULT:
 		evt.resid = *((int*)data);
 		dsb_nid_unpack((const char*)data+sizeof(int),&evt.d1);
-		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_EVENTRESULT")));
+		dsb_nid_toStr(&(evt.d1),buf,100);
+		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_EVENTRESULT")) << QString(buf));
 		item->setIcon(0,QIcon(":/icons/email_open.png"));
 		item2 = new QTreeWidgetItem(item, QStringList(QString("ID")) << QString("%1").arg(evt.resid));
-		dsb_nid_toStr(&(evt.d1),buf,100);
 		item2 = new QTreeWidgetItem(item, QStringList(QString("Result")) << QString(buf));
 		m_tree->insertTopLevelItem(0,item);
-		item->setExpanded(true);
+		//item->setExpanded(true);
 		break;
 
 	case DSBNET_BASE:
@@ -199,16 +200,16 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		dsb_nid_toStr(&(evt.d1),buf,100);
 		item2 = new QTreeWidgetItem(item, QStringList(QString("Persistent Root")) << QString(buf));
 		m_tree->insertTopLevelItem(0,item);
-		item->setExpanded(true);
+		//item->setExpanded(true);
 		break;
 
 	case DSBNET_ERROR:
-			item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_ERROR")));
-			item->setIcon(0,QIcon(":/icons/email_open.png"));
-			item2 = new QTreeWidgetItem(item, QStringList(QString("Error")) << QString(dsb_log_str(evt.err)));
-			m_tree->insertTopLevelItem(0,item);
-			item->setExpanded(true);
-			break;
+		item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("DSBNET_ERROR")));
+		item->setIcon(0,QIcon(":/icons/email_open.png"));
+		item2 = new QTreeWidgetItem(item, QStringList(QString("Error")) << QString(dsb_log_str(evt.err)));
+		m_tree->insertTopLevelItem(0,item);
+		//item->setExpanded(true);
+		break;
 	default:				break;
 	}
 }
@@ -226,8 +227,15 @@ void MessageLogger::toolclick(QAction *a)
 	}
 	else if (a->text() == "Record")
 	{
-		a->setIcon(QIcon(":/icons/control_pause_blue.png"));
 		m_paused = !m_paused;
+		if (m_paused == false)
+		{
+			a->setIcon(QIcon(":/icons/control_pause_blue.png"));
+		}
+		else
+		{
+			a->setIcon(QIcon(":/icons/control_play_blue.png"));
+		}
 	}
 }
 
@@ -236,7 +244,7 @@ void MessageLogger::delayedNamesRebuild()
 	m_namesrebuild = true;
 }
 
-extern TreeView *treeview;
+extern DSBIde *ide;
 
 void MessageLogger::netpoll()
 {
@@ -246,6 +254,6 @@ void MessageLogger::netpoll()
 		m_namesrebuild = false;
 		dsb_names_rebuild();
 
-		treeview->setRoot(Root);
+		ide->connected();
 	}
 }

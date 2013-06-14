@@ -203,7 +203,7 @@ TreeView::TreeView()
 	m_editobj = new EditObject();
 
 	setWindowTitle("Tree Browser");
-	resize(600,400);
+	//resize(600,400);
 	show();
 
 	connect(m_tree,SIGNAL(itemCollapsed(QTreeWidgetItem *)),this,SLOT(collapsed(QTreeWidgetItem *)));
@@ -249,6 +249,7 @@ void TreeView::setRoot(const NID_t &root)
 
 	item = new QTreeWidgetItem();
 	item->setText(0,"root");
+	item->setIcon(0,QIcon(":/icons/house.png"));
 	item->setData(1,Qt::UserRole,QVariant::fromValue(root));
 	m_tree->insertTopLevelItem(0,item);
 
@@ -315,14 +316,21 @@ void TreeView::expanded(QTreeWidgetItem *item)
 			}
 			else
 			{
+				QFont tmpfont = item2->font(1);
+				tmpfont.setStyle(QFont::StyleItalic);
 				item2->setIcon(0,QIcon(":/icons/folder.png"));
+				item2->setFont(1,tmpfont);
+				item2->setForeground(1,QBrush(QColor("grey")));
 			}
 		}
 		else
 		{
 			switch(value.t)
 			{
-			case NID_INTEGER:	item2->setIcon(0,QIcon(":/icons/tag_blue.png")); break;
+			case NID_INTEGER:	item2->setIcon(0,QIcon(":/icons/tag_blue.png"));
+								item2->setForeground(1,QBrush(QColor("blue")));
+								break;
+			case NID_SPECIAL:	item2->setIcon(0,QIcon(":/icons/tag_green.png")); break;
 			default: break;
 			}
 		}

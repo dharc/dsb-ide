@@ -28,5 +28,9 @@
 		<file>icons/pencil.png</file>
 		<file>icons/tag_blue.png</file>
 		<file>icons/tag_red.png</file>
+		<file>icons/tag_green.png</file>
+		<file>icons/house.png</file>
+		<file>icons/connect.png</file>
+		<file>icons/disconnect.png</file>
 	</qresource>
 </RCC>
