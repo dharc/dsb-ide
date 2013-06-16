@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 	cdiag->show();
 	//new Assembler();
 	//treeview = new TreeView();
-	ide = new DSBIde();
+	new DSBIde();
 
 	QApplication::exec();
 

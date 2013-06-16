@@ -46,9 +46,13 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtCore/QCoreApplication>
 #include <qt4/QtGui/QMenuBar>
 
+extern DSBIde *ide;
+
 DSBIde::DSBIde()
  : QMainWindow()
 {
+	ide = this;
+
 	//QVBoxLayout *mainlayout = new QVBoxLayout();
 	QSplitter *split = new QSplitter(Qt::Horizontal);
 	QSplitter *vsplit = new QSplitter(Qt::Vertical);

@@ -32,5 +32,9 @@
 		<file>icons/house.png</file>
 		<file>icons/connect.png</file>
 		<file>icons/disconnect.png</file>
+		<file>icons/blob-harc.png</file>
+		<file>icons/blob-int.png</file>
+		<file>icons/blob-bool.png</file>
+		<file>icons/blob-label.png</file>
 	</qresource>
 </RCC>

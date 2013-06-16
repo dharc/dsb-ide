@@ -33,6 +33,7 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "treeview.h"
+#include "ide.h"
 
 #include <dsb/nid.h>
 #include <dsb/iterator.h>
@@ -46,6 +47,8 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QAction>
 
 Q_DECLARE_METATYPE(NID);
+
+extern DSBIde *ide;
 
 AddObject::AddObject()
 	: QWidget(0,Qt::Dialog)
@@ -197,6 +200,8 @@ TreeView::TreeView()
 	m_tree->setColumnCount(2);
 	m_tree->setHeaderLabels(QStringList(QString("Object")) << QString("Value"));
 	m_tree->setColumnWidth(0,250);
+	m_tree->setIconSize(QSize(24,24));
+	//m_tree->setAlternatingRowColors(true);
 	mainlayout->addWidget(m_tree);
 
 	m_addobj = new AddObject();
@@ -222,7 +227,8 @@ void TreeView::make_toolbar(QLayout *l)
 	m_bar->addAction(QIcon(":/icons/add.png"),"Add");
 	m_bar->addAction(QIcon(":/icons/delete.png"),"Delete");
 	m_bar->addAction(QIcon(":/icons/pencil.png"),"Edit");
-	l->addWidget(m_bar);
+	//l->addWidget(m_bar);
+	ide->addToolBar(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
 
@@ -312,13 +318,13 @@ void TreeView::expanded(QTreeWidgetItem *item)
 		{
 			if (item2->childCount() == 0)
 			{
-				item2->setIcon(0,QIcon(":/icons/tag_red.png"));
+				item2->setIcon(0,QIcon(":/icons/blob-label.png"));
 			}
 			else
 			{
 				QFont tmpfont = item2->font(1);
 				tmpfont.setStyle(QFont::StyleItalic);
-				item2->setIcon(0,QIcon(":/icons/folder.png"));
+				item2->setIcon(0,QIcon(":/icons/blob-harc.png"));
 				item2->setFont(1,tmpfont);
 				item2->setForeground(1,QBrush(QColor("grey")));
 			}
@@ -327,10 +333,10 @@ void TreeView::expanded(QTreeWidgetItem *item)
 		{
 			switch(value.t)
 			{
-			case NID_INTEGER:	item2->setIcon(0,QIcon(":/icons/tag_blue.png"));
+			case NID_INTEGER:	item2->setIcon(0,QIcon(":/icons/blob-int.png"));
 								item2->setForeground(1,QBrush(QColor("blue")));
 								break;
-			case NID_SPECIAL:	item2->setIcon(0,QIcon(":/icons/tag_green.png")); break;
+			case NID_SPECIAL:	item2->setIcon(0,QIcon(":/icons/blob-bool.png")); break;
 			default: break;
 			}
 		}
