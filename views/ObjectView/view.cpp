@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * view.cpp
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 17 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,51 +32,62 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#include <dsb/module.h>
+#include <dsb/nid.h>
+#include "dsb/ide/view.h"
+#include <dsb/pattern_types.h>
 
-#include <qt4/QtGui/QMainWindow>
+#include "objectview.h"
 
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ConnectDialog;
-class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
 
-class DSBIde : public QMainWindow
+ObjectView::ObjectView()
+ : DSBView()
 {
-	Q_OBJECT
 
-public:
-	DSBIde();
-	~DSBIde();
+}
 
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+ObjectView::~ObjectView()
+{
 
-private:
-	void make_toolbar();
-	void make_menu();
+}
 
-	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
+void ObjectView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
+{
 
-public slots:
-	void toolclick(QAction *);
-	void closeView(int index);
+}
+
+void ObjectView::clearHARCs()
+{
+
+}
+
+static struct Module viewmod;
+
+static int view_init(const NID_t *base)
+{
+	DSBView::registerView<ObjectView>();
+	DSBView::mapView<ObjectView>(DSB_PATTERN_OBJECT);
+	return 0;
+}
+
+static int view_final()
+{
+	return 0;
+}
+
+
+extern "C"
+{
+/*
+ * Module registration structure.
+ */
+struct Module *dsb_objectview_info()
+{
+	viewmod.init = view_init;
+	viewmod.update = 0;
+	viewmod.final = view_final;
+	viewmod.ups = 0;
+	return &viewmod;
+}
 };
 
-
-#endif /* IDE_H_ */

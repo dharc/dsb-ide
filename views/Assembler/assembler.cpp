@@ -42,6 +42,8 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/wrap.h"
 #include "dsb/globals.h"
 #include "dsb/string.h"
+#include "dsb/assembler.h"
+#include "dsb/array.h"
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
 #include <qt4/QtGui/QAction>
@@ -106,18 +108,20 @@ void SaveObject::cancelclicked()
 }
 
 Assembler::Assembler()
- : QWidget()
+ : DSBView()
 {
 	QVBoxLayout *mainlayout = new QVBoxLayout();
 	QSplitter *split = new QSplitter(Qt::Horizontal);
 	setLayout(mainlayout);
+
+	setAutoFillBackground(true);
 
 	m_bar = new QToolBar();
 	m_bar->addAction(QIcon(":/icons/script.png"),"New");
 	m_bar->addAction(QIcon(":/icons/folder.png"),"Open");
 	m_bar->addAction(QIcon(":/icons/disk.png"),"Save");
 	m_bar->addSeparator();
-	m_bar->addAction(QIcon(":/icons/table_edit.png"),"Edit Object");
+	//m_bar->addAction(QIcon(":/icons/table_edit.png"),"Edit Object");
 	m_bar->addAction(QIcon(":/icons/table_save.png"),"Save Object");
 	m_bar->addSeparator();
 	m_play = m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Run");
@@ -176,6 +180,30 @@ Assembler::Assembler()
 Assembler::~Assembler()
 {
 
+}
+
+void Assembler::clearHARCs()
+{
+
+}
+
+void Assembler::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
+{
+	char buffer[10000];
+	NID_t *array;
+	int size;
+
+	size = dsb_array_readalloc(&h,&array);
+	if (size > 0)
+	{
+		dsb_disassemble(array,size,buffer,10000);
+		m_asm->setText(buffer);
+	}
+	free(array);
+
+	m_def = h;
+	m_obj = t1;
+	m_key = t2;
 }
 
 void Assembler::saveObject(const NID_t &n, bool incsrc)
@@ -242,7 +270,9 @@ void Assembler::toolclick(QAction *a)
 	}
 	else if (a->text() == "Save Object")
 	{
-		m_saveobj->show();
+		//m_saveobj->show();
+		saveObject(m_def,true);
+		dsb_define(&m_obj,&m_key,&m_def,2);
 	}
 }
 

@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * view.cpp
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 17 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,51 +32,40 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#include "dsb/ide/view.h"
+#include "dsb/module.h"
+#include "dsb/nid.h"
+#include "dsb/pattern_types.h"
+#include "assembler.h"
 
-#include <qt4/QtGui/QMainWindow>
+static struct Module asmmod;
 
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ConnectDialog;
-class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
-
-class DSBIde : public QMainWindow
+static int asm_init(const NID_t *base)
 {
-	Q_OBJECT
+	DSBView::registerView<Assembler>();
+	DSBView::mapView<Assembler>(DSB_PATTERN_BYTECODE);
+	return 0;
+}
 
-public:
-	DSBIde();
-	~DSBIde();
+static int asm_final()
+{
+	return 0;
+}
 
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
 
-private:
-	void make_toolbar();
-	void make_menu();
-
-	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
-
-public slots:
-	void toolclick(QAction *);
-	void closeView(int index);
+extern "C"
+{
+/*
+ * Module registration structure.
+ */
+struct Module *dsb_assemblerview_info()
+{
+	asmmod.init = asm_init;
+	asmmod.update = 0;
+	asmmod.final = asm_final;
+	asmmod.ups = 0;
+	return &asmmod;
+}
 };
 
 
-#endif /* IDE_H_ */

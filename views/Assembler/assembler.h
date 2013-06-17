@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * assember.h
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 31 May 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,51 +32,90 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#ifndef IDEASSEMBLER_H_
+#define IDEASSEMBLER_H_
 
-#include <qt4/QtGui/QMainWindow>
+#include "dsb/vm.h"
+#include "dsb/nid.h"
+#include "dsb/ide/view.h"
 
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ConnectDialog;
 class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
+class QToolBar;
+class QTextEdit;
+class QTableWidget;
+class QLabel;
+class QTabWidget;
+class QPushButton;
+class QLineEdit;
+class QCheckBox;
 
-class DSBIde : public QMainWindow
+class Assembler;
+
+class SaveObject : public QWidget
 {
 	Q_OBJECT
 
 public:
-	DSBIde();
-	~DSBIde();
-
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+	SaveObject(Assembler *a);
+	~SaveObject();
 
 private:
-	void make_toolbar();
-	void make_menu();
+	QLineEdit *m_obj;
+	QCheckBox *m_source;
+	QPushButton *m_save;
+	QPushButton *m_cancel;
+	Assembler *m_asm;
 
+public slots:
+	void saveclicked();
+	void cancelclicked();
+};
+
+class Assembler : public DSBView
+{
+	Q_OBJECT
+
+public:
+	DSBVIEW(Assembler);
+
+	Assembler();
+	~Assembler();
+
+	const char *title() { return "Assembler"; }
+	void clearHARCs();
+	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h);
+
+	//void setObject(const NID_t &obj);
+	void saveObject(const NID_t &obj, bool incsrc);
+
+private:
 	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
+	QTextEdit *m_asm;
+	QTableWidget *m_regs;
+	QTableWidget *m_mem;
+	QLabel *m_result;
+	QAction *m_play;
+	QAction *m_debug;
+	QAction *m_step;
+	QTabWidget *m_tabs;
+	SaveObject *m_saveobj;
+	NID_t m_def;
+	NID_t m_obj;
+	NID_t m_key;
+
+	bool m_running;
+	struct VMContext m_ctx;
+	int m_ipline[1000];
+
+	void start_debug();
+	void step_debug();
+	void save_asm();
+	void load_asm();
+	void stop();
+	void start();
 
 public slots:
 	void toolclick(QAction *);
-	void closeView(int index);
 };
 
-
-#endif /* IDE_H_ */
+#endif /* ASSEMBER_H_ */

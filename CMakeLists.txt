@@ -4,6 +4,7 @@ FIND_PACKAGE(Qt4 REQUIRED)
 
 # Need to include staged files and libs
 include_directories(${PROJECT_SOURCE_DIR}/source)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(/srv/stage/include)
 include_directories(../dsb/common/include)
 link_directories(/srv/stage/lib)
@@ -23,8 +24,8 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-D_DEBUG -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
 
-set(DSBIDESRC source/main.cpp source/connectdiag.cpp source/msglog.cpp source/msggen.cpp source/assembler.cpp source/asmsyntax.cpp source/treeview.cpp source/ide.cpp)
-set(DSBIDEHEADERS source/connectdiag.h source/msglog.h source/msggen.h source/assembler.h source/treeview.h source/ide.h)
+set(DSBIDESRC source/main.cpp source/connectdiag.cpp source/msglog.cpp source/msggen.cpp views/Assembler/assembler.cpp views/Assembler/view.cpp views/Assembler/asmsyntax.cpp source/treeview.cpp source/ide.cpp source/view.cpp views/ObjectView/view.cpp views/DisplayView/view.cpp)
+set(DSBIDEHEADERS source/connectdiag.h source/msglog.h source/msggen.h views/Assembler/assembler.h source/treeview.h source/ide.h include/dsb/ide/view.h views/ObjectView/objectview.h views/DisplayView/displayview.h)
 set(DSBIDERCCS data/icons.qrc data/splash.qrc)
 
 # configure_file( ${CMAKE_SOURCE_DIR}/common/include/dsb/config.h.in ${CMAKE_BINARY_DIR}/config.h )

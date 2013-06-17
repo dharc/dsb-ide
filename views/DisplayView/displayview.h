@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * displayview.h
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 17 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,51 +32,36 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#ifndef DISPLAYVIEW_H_
+#define DISPLAYVIEW_H_
 
-#include <qt4/QtGui/QMainWindow>
+#include "dsb/ide/view.h"
+#include <dsb/nid.h>
 
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ConnectDialog;
-class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
-
-class DSBIde : public QMainWindow
+class DisplayView : public DSBView
 {
 	Q_OBJECT
 
 public:
-	DSBIde();
-	~DSBIde();
+	DSBVIEW(DisplayView);
 
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+	DisplayView();
+	~DisplayView();
+
+	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h);
+	void clearHARCs();
+	const char *title() { return "Display"; }
+
+	void paintEvent(QPaintEvent *event);
+
+	void drawElement(QPainter &painter, const NID_t *ele);
+	void drawLine(QPainter &painter, const NID_t *ele);
 
 private:
-	void make_toolbar();
-	void make_menu();
-
-	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
-
-public slots:
-	void toolclick(QAction *);
-	void closeView(int index);
+	int m_width;
+	int m_height;
+	NID_t m_obj;
 };
 
 
-#endif /* IDE_H_ */
+#endif /* DISPLAYVIEW_H_ */

@@ -38,25 +38,43 @@ either expressed or implied, of the FreeBSD Project.
 /** @file view.h */
 
 #include <qt4/QtGui/QWidget>
+#include <dsb/nid.h>
 
-#define DSBVIEW(A) const char *type() { return #A; } \
+#define DSBVIEW(A) static const char *type() { return #A; } \
 	static A *create() { return new A(); }
 
 class DSBView : public QWidget
 {
+	Q_OBJECT
+
 public:
 	DSBView();
 	virtual ~DSBView();
 
-	virtual const char *type() { return "DSBView"; }
+	static const char *type() { return "DSBView"; }
 
-	virtual void addHARC(const NID_t &t1, const NID_t &t2)=0;
+	virtual const char *title()=0;
+	virtual void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)=0;
 	virtual void clearHARCs()=0;
 
 	template <typename T>
-	static void registerView<T>();
+	static void registerView()
+	{
+		registerViewInternal((DSBView*(*)())T::create, T::type());
+	}
+
+	template <typename T>
+	static void mapView(int pat)
+	{
+		mapViewInternal(T::type(), pat);
+	}
 
 	static DSBView *createView(const char *type);
+	static DSBView *createView(int pat);
+
+private:
+	static void registerViewInternal(DSBView *(*creator)(), const char *name);
+	static void mapViewInternal(const char *name, int pat);
 };
 
 #endif /* VIEW_H_ */

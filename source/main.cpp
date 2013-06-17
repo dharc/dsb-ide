@@ -36,7 +36,6 @@ either expressed or implied, of the FreeBSD Project.
 #include "eventlog.h"
 #include "connectdiag.h"
 #include "msglog.h"
-#include "assembler.h"
 #include "treeview.h"
 #include "ide.h"
 #include "dsb/event.h"
@@ -129,12 +128,23 @@ int net_cb_event(void *sock, void *data)
 	return 0;
 }
 
+extern "C" struct Module *dsb_objectview_info();
+extern "C" struct Module *dsb_displayview_info();
+extern "C" struct Module *dsb_assemblerview_info();
+
 int main(int argc, char *argv[])
 {
 	QApplication qtapp(argc,argv);
 
 	setenv("DSB_SERIAL","10:00:00:00:00:00",0);
 	dsb_common_init();
+
+	dsb_module_register("objectview",dsb_objectview_info());
+	dsb_module_register("displayview",dsb_displayview_info());
+	dsb_module_register("assemblerview",dsb_assemblerview_info());
+	dsb_module_load("objectview",&Null);
+	dsb_module_load("displayview",&Null);
+	dsb_module_load("assemblerview",&Null);
 
 	dsb_net_callback(DSBNET_EVENTRESULT,net_cb_result);
 	dsb_net_callback(DSBNET_ERROR,net_cb_error);

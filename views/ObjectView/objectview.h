@@ -1,7 +1,7 @@
 /*
- * assember.h
+ * objectview.h
  *
- *  Created on: 31 May 2013
+ *  Created on: 17 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,80 +32,25 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDEASSEMBLER_H_
-#define IDEASSEMBLER_H_
+#ifndef OBJECTVIEW_H_
+#define OBJECTVIEW_H_
 
-#include <qt4/QtGui/QWidget>
-#include "dsb/vm.h"
+#include "dsb/ide/view.h"
 
-class QAction;
-class QToolBar;
-class QTextEdit;
-class QTableWidget;
-class QLabel;
-class QTabWidget;
-class QPushButton;
-class QLineEdit;
-class QCheckBox;
-
-class Assembler;
-
-class SaveObject : public QWidget
+class ObjectView : public DSBView
 {
 	Q_OBJECT
 
 public:
-	SaveObject(Assembler *a);
-	~SaveObject();
+	DSBVIEW(ObjectView);
 
-private:
-	QLineEdit *m_obj;
-	QCheckBox *m_source;
-	QPushButton *m_save;
-	QPushButton *m_cancel;
-	Assembler *m_asm;
+	ObjectView();
+	~ObjectView();
 
-public slots:
-	void saveclicked();
-	void cancelclicked();
+	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h);
+	void clearHARCs();
+	const char *title() { return "Object"; }
 };
 
-class Assembler : public QWidget
-{
-	Q_OBJECT
 
-public:
-	Assembler();
-	~Assembler();
-
-	void setObject(const NID_t &obj);
-	void saveObject(const NID_t &obj, bool incsrc);
-
-private:
-	QToolBar *m_bar;
-	QTextEdit *m_asm;
-	QTableWidget *m_regs;
-	QTableWidget *m_mem;
-	QLabel *m_result;
-	QAction *m_play;
-	QAction *m_debug;
-	QAction *m_step;
-	QTabWidget *m_tabs;
-	SaveObject *m_saveobj;
-
-	bool m_running;
-	struct VMContext m_ctx;
-	int m_ipline[1000];
-
-	void start_debug();
-	void step_debug();
-	void save_asm();
-	void load_asm();
-	void stop();
-	void start();
-
-public slots:
-	void toolclick(QAction *);
-};
-
-#endif /* ASSEMBER_H_ */
+#endif /* OBJECTVIEW_H_ */

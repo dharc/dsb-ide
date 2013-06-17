@@ -43,6 +43,8 @@ class QTreeWidgetItem;
 class QToolBar;
 class QLineEdit;
 class QPushButton;
+class QMenu;
+class QPoint;
 
 class AddObject : public QWidget
 {
@@ -102,6 +104,8 @@ private:
 	QToolBar *m_bar;
 	AddObject *m_addobj;
 	EditObject *m_editobj;
+	QMenu *m_treemenu;
+	QTreeWidgetItem *m_menuitem;
 
 	void make_toolbar(QLayout *);
 
@@ -109,7 +113,9 @@ public slots:
 	void expanded(QTreeWidgetItem *item);
 	void collapsed(QTreeWidgetItem *item);
 	void toolclick(QAction *);
+	void menuclick(QAction *);
 	void doubleclick(QTreeWidgetItem *item, int col);
+	void showContextMenu(const QPoint &pnt);
 };
 
 #endif /* TREEVIEW_H_ */

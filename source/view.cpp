@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * view.cpp
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 17 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,51 +32,49 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#include "dsb/ide/view.h"
+#include <qt4/QtCore/QHash>
 
-#include <qt4/QtGui/QMainWindow>
+#include <cstdio>
 
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ConnectDialog;
-class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
+static QHash<QString,DSBView*(*)()> views;
+static QHash<int,QString> patterns;
 
-class DSBIde : public QMainWindow
+DSBView::DSBView()
+	: QWidget()
 {
-	Q_OBJECT
 
-public:
-	DSBIde();
-	~DSBIde();
+}
 
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+DSBView::~DSBView()
+{
 
-private:
-	void make_toolbar();
-	void make_menu();
+}
 
-	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
+void DSBView::registerViewInternal(DSBView *(*creator)(), const char *name)
+{
+	views.insert(name,creator);
+}
 
-public slots:
-	void toolclick(QAction *);
-	void closeView(int index);
-};
+void DSBView::mapViewInternal(const char *name, int pat)
+{
+	printf("Map pattern %x to: %s\n",pat,name);
+	patterns.insert(pat, name);
+}
 
+DSBView *DSBView::createView(const char *type)
+{
+	DSBView *(*creator)() = views.value(type,0);
+	if (creator != 0)
+	{
+		return creator();
+	}
+	return 0;
+}
 
-#endif /* IDE_H_ */
+DSBView *DSBView::createView(int pat)
+{
+	QString view = patterns.value(pat,"");
+
+	return createView(view.toAscii().constData());
+}

@@ -36,7 +36,9 @@ either expressed or implied, of the FreeBSD Project.
 #include "treeview.h"
 #include "msglog.h"
 #include "connectdiag.h"
+#include "dsb/ide/view.h"
 #include <dsb/globals.h>
+#include <dsb/pattern.h>
 #include <qt4/QtGui/QToolBar>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -45,6 +47,8 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QSplashScreen>
 #include <qt4/QtCore/QCoreApplication>
 #include <qt4/QtGui/QMenuBar>
+
+#include <cstdio>
 
 extern DSBIde *ide;
 
@@ -59,19 +63,21 @@ DSBIde::DSBIde()
 	//mainlayout->addWidget(split);
 	setCentralWidget(split);
 
-	make_menu();
+	//make_menu();
 	make_toolbar();
 
 	m_treeview = new TreeView();
 	split->addWidget(m_treeview);
 
 	m_tabviews = new QTabWidget();
+	m_tabviews->setTabsClosable(true);
+	connect(m_tabviews,SIGNAL(tabCloseRequested(int)),this,SLOT(closeView(int)));
 	vsplit->addWidget(m_tabviews);
 	m_tabsys = new QTabWidget();
 	vsplit->addWidget(m_tabsys);
 
 	m_msglogger = new MessageLogger();
-	m_tabsys->addTab(m_msglogger,"Messages");
+	m_tabsys->addTab(m_msglogger,"Network");
 
 	split->addWidget(vsplit);
 
@@ -104,6 +110,7 @@ void DSBIde::connected()
 	m_treeview->setRoot(Root);
 	m_bar_connect->setIcon(QIcon(":/icons/disconnect.png"));
 	m_bar_connect->setText("Disconnect");
+	m_splash->hide();
 	show();
 }
 
@@ -132,6 +139,13 @@ void DSBIde::toolclick(QAction *a)
 	}
 }
 
+void DSBIde::closeView(int index)
+{
+	QWidget *cur = m_tabviews->widget(index);
+	m_tabviews->removeTab(index);
+	delete cur;
+}
+
 void DSBIde::showSplash()
 {
 	m_splash->show();
@@ -142,5 +156,19 @@ void DSBIde::showSplash()
 void DSBIde::hideSplash()
 {
 	m_splash->hide();
+}
+
+void DSBIde::newView(const NID_t &d1, const NID_t &d2, const NID_t &nid)
+{
+	unsigned int pat = dsb_pattern_what(&nid);
+
+	printf("Pattern: %x\n",pat);
+
+	DSBView *nv = DSBView::createView(pat);
+	if (nv != 0)
+	{
+		nv->addHARC(d1,d2,nid);
+		m_tabviews->addTab(nv,nv->title());
+	}
 }
 

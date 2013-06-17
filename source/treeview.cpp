@@ -38,6 +38,10 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/nid.h>
 #include <dsb/iterator.h>
 #include <dsb/wrap.h>
+#include <dsb/pattern.h>
+#include <dsb/pattern_types.h>
+#include <dsb/vm.h>
+#include <dsb/globals.h>
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -45,6 +49,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QLineEdit>
 #include <qt4/QtGui/QPushButton>
 #include <qt4/QtGui/QAction>
+#include <qt4/QtGui/QMenu>
 
 Q_DECLARE_METATYPE(NID);
 
@@ -201,8 +206,19 @@ TreeView::TreeView()
 	m_tree->setHeaderLabels(QStringList(QString("Object")) << QString("Value"));
 	m_tree->setColumnWidth(0,250);
 	m_tree->setIconSize(QSize(24,24));
+	m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_tree,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(showContextMenu(const QPoint&)));
 	//m_tree->setAlternatingRowColors(true);
 	mainlayout->addWidget(m_tree);
+
+	m_treemenu = new QMenu();
+	m_treemenu->addAction("View");
+	m_treemenu->addMenu("View As");
+	m_treemenu->addAction("Edit");
+	m_treemenu->addAction("Edit Definition");
+	m_treemenu->addAction("Insert");
+	m_treemenu->addAction("Delete");
+	connect(m_treemenu, SIGNAL(triggered(QAction*)), this, SLOT(menuclick(QAction*)));
 
 	m_addobj = new AddObject();
 	m_editobj = new EditObject();
@@ -240,12 +256,54 @@ void TreeView::toolclick(QAction *a)
 	}
 }
 
+void TreeView::menuclick(QAction *a)
+{
+	if (m_menuitem == 0) return;
+
+	if (a->text() == "Edit Definition")
+	{
+		if (m_menuitem->parent() == 0) return;
+
+		NID_t def;
+		NID_t obj = m_menuitem->parent()->data(1,Qt::UserRole).value<NID>();
+		NID_t key = m_menuitem->data(0,Qt::UserRole).value<NID>();
+		int eval;
+		dsb_getdef(&obj,&key,&def,&eval);
+
+		//If no definition then make one.
+		if (dsb_nid_eq(&def,&Null) == 1)
+		{
+			NID_t vmop;
+			dsb_nid(NID_VMOP,VM_RET(0),&vmop);
+			dsb_new(&PRoot,&def);
+			dsb_setnni(&def,&Size,1);
+			dsb_setnin(&def,0,&vmop);
+
+			dsb_define(&obj,&key,&def,2);
+		}
+
+		ide->newView(obj,key,def);
+	}
+}
+
 void TreeView::doubleclick(QTreeWidgetItem *item, int col)
 {
 	if (item != 0)
 	{
-		m_editobj->showEditObject(item);
+		if (item->parent() == 0) return;
+		//m_editobj->showEditObject(item);
+		NID_t d1 = item->parent()->data(1,Qt::UserRole).value<NID>();
+		NID_t d2 = item->data(1,Qt::UserRole).value<NID>();
+		NID_t v = item->data(1,Qt::UserRole).value<NID>();
+		ide->newView(d1,d2,v);
 	}
+}
+
+void TreeView::showContextMenu(const QPoint &pnt)
+{
+	QPoint globalPos = m_tree->mapToGlobal(pnt);
+	m_menuitem = m_tree->itemAt(pnt);
+	m_treemenu->exec(globalPos);
 }
 
 void TreeView::setRoot(const NID_t &root)
@@ -313,32 +371,51 @@ void TreeView::expanded(QTreeWidgetItem *item)
 		}
 		dsb_iterator_end(&it);
 
-		//Choose icon based upon values type.
-		if (value.hasMac == 1)
+		int type;
+		int eval;
+		bool definition = false;
+
+		type = dsb_pattern_what(&value);
+		dsb_getdef(&root,&key,&value,&eval);
+
+		if (dsb_pattern_isA(&value,DSB_PATTERN_BYTECODE))
 		{
-			if (item2->childCount() == 0)
-			{
-				item2->setIcon(0,QIcon(":/icons/blob-label.png"));
-			}
-			else
-			{
-				QFont tmpfont = item2->font(1);
-				tmpfont.setStyle(QFont::StyleItalic);
-				item2->setIcon(0,QIcon(":/icons/blob-harc.png"));
-				item2->setFont(1,tmpfont);
-				item2->setForeground(1,QBrush(QColor("grey")));
-			}
+			item2->setForeground(0,QBrush(QColor("blue")));
+			definition = true;
 		}
-		else
+
+		switch (type)
 		{
-			switch(value.t)
-			{
-			case NID_INTEGER:	item2->setIcon(0,QIcon(":/icons/blob-int.png"));
-								item2->setForeground(1,QBrush(QColor("blue")));
-								break;
-			case NID_SPECIAL:	item2->setIcon(0,QIcon(":/icons/blob-bool.png")); break;
-			default: break;
-			}
+		case DSB_PATTERN_INTEGER:	if (definition)
+									{
+										item2->setIcon(0,QIcon(":/icons/blob-int-blue.png"));
+									}
+									else
+									{
+										item2->setIcon(0,QIcon(":/icons/blob-int.png"));
+									}
+									item2->setForeground(1,QBrush(QColor("blue")));
+									break;
+		case DSB_PATTERN_BOOLEAN:	item2->setIcon(0,QIcon(":/icons/blob-bool.png"));
+									{
+										QFont tmpfont = item2->font(1);
+										tmpfont.setBold(true);
+										item2->setFont(1,tmpfont);
+									}
+									break;
+		default:					if (item2->childCount() == 0)
+									{
+										item2->setIcon(0,QIcon(":/icons/blob-label.png"));
+									}
+									else
+									{
+										QFont tmpfont = item2->font(1);
+										tmpfont.setStyle(QFont::StyleItalic);
+										item2->setIcon(0,QIcon(":/icons/blob-harc.png"));
+										item2->setFont(1,tmpfont);
+										item2->setForeground(1,QBrush(QColor("grey")));
+									}
+									break;
 		}
 	}
 }
