@@ -35,7 +35,7 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "msglog.h"
 #include "msggen.h"
-#include "ide.h"
+#include "dsb/ide/ide.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/nid.h"

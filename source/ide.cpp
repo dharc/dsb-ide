@@ -32,7 +32,7 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#include "ide.h"
+#include "dsb/ide/ide.h"
 #include "treeview.h"
 #include "msglog.h"
 #include "connectdiag.h"
@@ -127,6 +127,8 @@ void DSBIde::make_toolbar()
 {
 	m_bar = new QToolBar();
 	m_bar_connect = m_bar->addAction(QIcon(":/icons/connect.png"),"Connect");
+	m_bar->addSeparator();
+	m_bar->addAction(QIcon(":/icons/application_tile_horizontal.png"), "Split");
 	addToolBar(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }

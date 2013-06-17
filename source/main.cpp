@@ -37,7 +37,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "connectdiag.h"
 #include "msglog.h"
 #include "treeview.h"
-#include "ide.h"
+#include "dsb/ide/ide.h"
 #include "dsb/event.h"
 #include "dsb/wrap.h"
 #include "dsb/net.h"

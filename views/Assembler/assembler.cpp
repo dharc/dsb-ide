@@ -44,6 +44,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/string.h"
 #include "dsb/assembler.h"
 #include "dsb/array.h"
+#include "dsb/ide/ide.h"
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
 #include <qt4/QtGui/QAction>
@@ -58,6 +59,8 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtCore/QTextStream>
 #include <qt4/QtGui/QCheckBox>
 #include <iostream>
+
+extern DSBIde *ide;
 
 SaveObject::SaveObject(Assembler *a)
 	: QWidget(0,Qt::Dialog)
@@ -129,7 +132,8 @@ Assembler::Assembler()
 	m_step = m_bar->addAction(QIcon(":/icons/resultset_next.png"),"Step");
 	m_step->setEnabled(false);
 
-	mainlayout->addWidget(m_bar);
+	//mainlayout->addWidget(m_bar);
+	ide->addToolBar(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 
 	mainlayout->addWidget(split);
@@ -179,7 +183,7 @@ Assembler::Assembler()
 
 Assembler::~Assembler()
 {
-
+	ide->removeToolBar(m_bar);
 }
 
 void Assembler::clearHARCs()

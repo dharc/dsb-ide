@@ -33,7 +33,7 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "treeview.h"
-#include "ide.h"
+#include "dsb/ide/ide.h"
 
 #include <dsb/nid.h>
 #include <dsb/iterator.h>
@@ -207,6 +207,7 @@ TreeView::TreeView()
 	m_tree->setColumnWidth(0,250);
 	m_tree->setIconSize(QSize(24,24));
 	m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+	m_tree->setDragDropMode(QAbstractItemView::DragOnly);
 	connect(m_tree,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(showContextMenu(const QPoint&)));
 	//m_tree->setAlternatingRowColors(true);
 	mainlayout->addWidget(m_tree);

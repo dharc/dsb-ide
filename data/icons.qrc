@@ -37,5 +37,6 @@
 		<file>icons/blob-int-blue.png</file>
 		<file>icons/blob-bool.png</file>
 		<file>icons/blob-label.png</file>
+		<file>icons/application_tile_horizontal.png</file>
 	</qresource>
 </RCC>
