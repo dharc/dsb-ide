@@ -99,6 +99,7 @@ ConnectDialog::ConnectDialog()
 
 	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
 	connect(m_ok, SIGNAL(clicked()), this, SLOT(connectclicked()));
+	connect(m_host, SIGNAL(returnPressed()), this, SLOT(connectclicked()));
 }
 
 ConnectDialog::~ConnectDialog()

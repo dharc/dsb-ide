@@ -37,6 +37,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "connectdiag.h"
 #include "msglog.h"
 #include "treeview.h"
+#include "errlog.h"
 #include "dsb/ide/ide.h"
 #include "dsb/event.h"
 #include "dsb/wrap.h"
@@ -93,8 +94,20 @@ int net_cb_result(void *sock, void *data)
 
 int net_cb_error(void *sock, void *data)
 {
+	int errnum;
+	const char *data2;
+
 	ide->messageLogger()->addMessage(DSBNET_ERROR,data);
+
+	memcpy(&errnum,data,sizeof(int));
+	data2 = (const char*)data + sizeof(int);
+	ide->errorLogger()->addError(errnum,data2);
 	return 0;
+}
+
+static void log_handler(int msg, const char *str)
+{
+	ide->errorLogger()->addError(msg,str);
 }
 
 int net_cb_base(void *sock, void *data)
@@ -158,6 +171,8 @@ int main(int argc, char *argv[])
 	//new Assembler();
 	//treeview = new TreeView();
 	new DSBIde();
+
+	dsb_log_handler(log_handler);
 
 	QApplication::exec();
 

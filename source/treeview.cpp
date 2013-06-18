@@ -50,6 +50,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QPushButton>
 #include <qt4/QtGui/QAction>
 #include <qt4/QtGui/QMenu>
+#include <qt4/QtGui/QHeaderView>
 
 Q_DECLARE_METATYPE(NID);
 
@@ -203,8 +204,8 @@ TreeView::TreeView()
 
 	m_tree = new QTreeWidget();
 	m_tree->setColumnCount(2);
-	m_tree->setHeaderLabels(QStringList(QString("Object")) << QString("Value"));
-	m_tree->setColumnWidth(0,250);
+	m_tree->header()->close();
+	m_tree->setColumnWidth(0,220);
 	m_tree->setIconSize(QSize(24,24));
 	m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_tree->setDragDropMode(QAbstractItemView::DragOnly);
@@ -230,7 +231,7 @@ TreeView::TreeView()
 
 	connect(m_tree,SIGNAL(itemCollapsed(QTreeWidgetItem *)),this,SLOT(collapsed(QTreeWidgetItem *)));
 	connect(m_tree,SIGNAL(itemExpanded(QTreeWidgetItem *)),this,SLOT(expanded(QTreeWidgetItem *)));
-	connect(m_tree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(doubleclick(QTreeWidgetItem*,int)));
+	//connect(m_tree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(doubleclick(QTreeWidgetItem*,int)));
 }
 
 TreeView::~TreeView()
@@ -241,20 +242,75 @@ TreeView::~TreeView()
 void TreeView::make_toolbar(QLayout *l)
 {
 	m_bar = new QToolBar();
-	m_bar->addAction(QIcon(":/icons/add.png"),"Add");
-	m_bar->addAction(QIcon(":/icons/delete.png"),"Delete");
-	m_bar->addAction(QIcon(":/icons/pencil.png"),"Edit");
+	//m_acts[ACTION_NONE] = m_bar->addAction(QIcon(":/icons/cursor.png"),"None");
+	m_acts[ACTION_ADD] = m_bar->addAction(QIcon(":/icons/chart_organisation_add.png"),"Add");
+	m_acts[ACTION_DELETE] = m_bar->addAction(QIcon(":/icons/chart_organisation_delete.png"),"Delete");
+	m_acts[ACTION_EDIT] = m_bar->addAction(QIcon(":/icons/pencil.png"),"Edit");
+	m_acts[ACTION_EDITDEF] = m_bar->addAction(QIcon(":/icons/script_edit.png"),"Edit Definition");
+	m_acts[ACTION_VIEW] = m_bar->addAction(QIcon(":/icons/eye.png"),"View");
+	m_acts[ACTION_CLONE] = m_bar->addAction(QIcon(":/icons/page_copy.png"),"Clone");
+	m_acts[ACTION_MOVE] = m_bar->addAction(QIcon(":/icons/cut.png"),"Move");
+	m_acts[ACTION_LINK] = m_bar->addAction(QIcon(":/icons/link.png"),"Connect");
+	m_acts[ACTION_HELP] = m_bar->addAction(QIcon(":/icons/help.png"),"Help");
+
 	//l->addWidget(m_bar);
-	ide->addToolBar(m_bar);
+	ide->addToolBar(Qt::LeftToolBarArea,m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
 
 void TreeView::toolclick(QAction *a)
 {
-	if (a->text() == "Add")
+	unsigned int act = 0;
+	QTreeWidgetItem *curitem = m_tree->currentItem();
+
+	if (curitem == 0) return;
+
+	//Find which action it is.
+	for (act = 0; act<ACTION_END; act++)
 	{
-		m_addobj->showAddObject(m_tree->currentItem());
+		if (m_acts[act] == a) break;
 	}
+
+	if (act == ACTION_ADD)
+	{
+		m_addobj->showAddObject(curitem);
+	}
+	else if (act == ACTION_EDITDEF)
+	{
+		if (curitem->parent() == 0) return;
+		NID_t def;
+		NID_t obj = curitem->parent()->data(1,Qt::UserRole).value<NID>();
+		NID_t key = curitem->data(0,Qt::UserRole).value<NID>();
+		int eval;
+		dsb_getdef(&obj,&key,&def,&eval);
+
+		//If no definition then make one.
+		if (dsb_nid_eq(&def,&Null) == 1)
+		{
+			NID_t vmop;
+			dsb_nid(NID_VMOP,VM_RET(0),&vmop);
+			dsb_new(&PRoot,&def);
+			dsb_setnni(&def,&Size,1);
+			dsb_setnin(&def,0,&vmop);
+			dsb_define(&obj,&key,&def,2);
+		}
+
+		ide->newView(obj,key,def);
+	}
+	else if (act == ACTION_VIEW)
+	{
+		if (curitem->parent() == 0) return;
+		//m_editobj->showEditObject(item);
+		NID_t d1 = curitem->parent()->data(1,Qt::UserRole).value<NID>();
+		NID_t d2 = curitem->data(1,Qt::UserRole).value<NID>();
+		NID_t v = curitem->data(1,Qt::UserRole).value<NID>();
+		ide->newView(d1,d2,v);
+	}
+
+	//if (a->text() == "Add")
+	//{
+	//	m_addobj->showAddObject(m_tree->currentItem());
+	//}
 }
 
 void TreeView::menuclick(QAction *a)
@@ -289,7 +345,7 @@ void TreeView::menuclick(QAction *a)
 
 void TreeView::doubleclick(QTreeWidgetItem *item, int col)
 {
-	if (item != 0)
+	/*if (item != 0)
 	{
 		if (item->parent() == 0) return;
 		//m_editobj->showEditObject(item);
@@ -297,7 +353,7 @@ void TreeView::doubleclick(QTreeWidgetItem *item, int col)
 		NID_t d2 = item->data(1,Qt::UserRole).value<NID>();
 		NID_t v = item->data(1,Qt::UserRole).value<NID>();
 		ide->newView(d1,d2,v);
-	}
+	}*/
 }
 
 void TreeView::showContextMenu(const QPoint &pnt)
@@ -307,13 +363,13 @@ void TreeView::showContextMenu(const QPoint &pnt)
 	m_treemenu->exec(globalPos);
 }
 
-void TreeView::setRoot(const NID_t &root)
+void TreeView::setRoot(const NID_t &root, QString &name)
 {
 	QTreeWidgetItem *item;
 	QTreeWidgetItem *item2;
 
 	item = new QTreeWidgetItem();
-	item->setText(0,"root");
+	item->setText(0,name);
 	item->setIcon(0,QIcon(":/icons/house.png"));
 	item->setData(1,Qt::UserRole,QVariant::fromValue(root));
 	m_tree->insertTopLevelItem(0,item);
@@ -333,6 +389,11 @@ void TreeView::setRoot(const NID_t &root)
 		p = dsb_iterator_next(&it);
 	}
 	dsb_iterator_end(&it);
+}
+
+void TreeView::clear()
+{
+	m_tree->clear();
 }
 
 void TreeView::expanded(QTreeWidgetItem *item)

@@ -49,8 +49,11 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QAction>
 #include <qt4/QtGui/QToolBar>
 #include <qt4/QtCore/QTimer>
+#include <qt4/QtGui/QHeaderView>
 
 #include <iostream>
+
+extern DSBIde *ide;
 
 MessageLogger::MessageLogger()
 	: QWidget()
@@ -62,6 +65,7 @@ MessageLogger::MessageLogger()
 	make_tree(mainlayout);
 
 	setWindowTitle("Message Log");
+	setAutoFillBackground(true);
 	//resize(600,400);
 	show();
 
@@ -84,10 +88,11 @@ MessageLogger::~MessageLogger()
 void MessageLogger::make_toolbar(QLayout *l)
 {
 	m_bar = new QToolBar();
-	m_bar->addAction(QIcon(":/icons/add.png"),"Send");
+	m_bar->addAction(QIcon(":/icons/email_add.png"),"Send");
 	m_bar->addAction(QIcon(":/icons/bin.png"),"Clear");
 	m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Record");
-	l->addWidget(m_bar);
+	//l->addWidget(m_bar);
+	ide->addToolBar(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
 
@@ -95,8 +100,10 @@ void MessageLogger::make_tree(QLayout *l)
 {
 	m_tree = new QTreeWidget();
 	m_tree->setColumnCount(2);
-	m_tree->setHeaderLabels(QStringList(QString("Name")) << QString("Value"));
+	//m_tree->setHeaderLabels(QStringList(QString("Name")) << QString("Value"));
+	m_tree->header()->close();
 	m_tree->setColumnWidth(0,250);
+	m_tree->setAlternatingRowColors(true);
 	l->addWidget(m_tree);
 }
 

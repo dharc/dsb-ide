@@ -273,7 +273,7 @@ void MessageGenerator::send_eventresult()
 
 void MessageGenerator::send_error()
 {
-	dsb_net_send_error(hostsock, m_table->item(0,1)->text().toInt());
+	dsb_net_send_error(hostsock, m_table->item(0,1)->text().toInt(),"");
 }
 
 void MessageGenerator::send_login()

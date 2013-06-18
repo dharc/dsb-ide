@@ -113,19 +113,21 @@ void SaveObject::cancelclicked()
 Assembler::Assembler()
  : DSBView()
 {
+	QWidget *central = new QWidget();
 	QVBoxLayout *mainlayout = new QVBoxLayout();
 	QSplitter *split = new QSplitter(Qt::Horizontal);
-	setLayout(mainlayout);
+	central->setLayout(mainlayout);
+	setCentralWidget(central);
 
-	setAutoFillBackground(true);
+	central->setAutoFillBackground(true);
 
 	m_bar = new QToolBar();
-	m_bar->addAction(QIcon(":/icons/script.png"),"New");
-	m_bar->addAction(QIcon(":/icons/folder.png"),"Open");
-	m_bar->addAction(QIcon(":/icons/disk.png"),"Save");
+	m_bar->addAction(QIcon(":/icons/page.png"),"New");
+	m_bar->addAction(QIcon(":/icons/folder_page.png"),"Open");
+	m_bar->addAction(QIcon(":/icons/page_save.png"),"Save");
 	m_bar->addSeparator();
 	//m_bar->addAction(QIcon(":/icons/table_edit.png"),"Edit Object");
-	m_bar->addAction(QIcon(":/icons/table_save.png"),"Save Object");
+	m_bar->addAction(QIcon(":/icons/script_save.png"),"Save Object");
 	m_bar->addSeparator();
 	m_play = m_bar->addAction(QIcon(":/icons/control_play_blue.png"),"Run");
 	m_debug = m_bar->addAction(QIcon(":/icons/bug.png"),"Debug");
@@ -133,7 +135,8 @@ Assembler::Assembler()
 	m_step->setEnabled(false);
 
 	//mainlayout->addWidget(m_bar);
-	ide->addToolBar(m_bar);
+	//ide->addToolBar(m_bar);
+	addToolBar(Qt::LeftToolBarArea,m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 
 	mainlayout->addWidget(split);
@@ -171,8 +174,8 @@ Assembler::Assembler()
 	mainlayout->addWidget(m_result);
 
 	setWindowTitle("DSB Assembler");
-	resize(700,400);
-	show();
+	//resize(700,400);
+	//show();
 
 	m_running = false;
 	m_ctx.code = new NID_t[1000];

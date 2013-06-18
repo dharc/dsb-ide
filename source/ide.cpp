@@ -35,10 +35,13 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/ide/ide.h"
 #include "treeview.h"
 #include "msglog.h"
+#include "errlog.h"
 #include "connectdiag.h"
 #include "dsb/ide/view.h"
 #include <dsb/globals.h>
 #include <dsb/pattern.h>
+#include <dsb/net.h>
+#include <dsb/net_protocol.h>
 #include <qt4/QtGui/QToolBar>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -47,10 +50,12 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QSplashScreen>
 #include <qt4/QtCore/QCoreApplication>
 #include <qt4/QtGui/QMenuBar>
+#include <qt4/QtGui/QStatusBar>
 
 #include <cstdio>
 
 extern DSBIde *ide;
+extern void *hostsock;
 
 DSBIde::DSBIde()
  : QMainWindow()
@@ -78,17 +83,19 @@ DSBIde::DSBIde()
 
 	m_msglogger = new MessageLogger();
 	m_tabsys->addTab(m_msglogger,"Network");
+	m_errlogger = new ErrorLogger();
+	m_tabsys->addTab(m_errlogger,"Errors");
 
 	split->addWidget(vsplit);
 
 	QList<int> sizes;
-	sizes.append(10);
-	sizes.append(200);
+	sizes.append(220);
+	sizes.append(1000);
 	split->setSizes(sizes);
 
 	QList<int> sizes2;
-	sizes2.append(200);
-	sizes2.append(10);
+	sizes2.append(1000);
+	sizes2.append(300);
 	vsplit->setSizes(sizes2);
 
 	m_connect = new ConnectDialog();
@@ -107,10 +114,17 @@ DSBIde::~DSBIde()
 
 void DSBIde::connected()
 {
-	m_treeview->setRoot(Root);
+	QString name = m_connect->getHost();
+	m_treeview->setRoot(Root, name);
 	m_bar_connect->setIcon(QIcon(":/icons/disconnect.png"));
 	m_bar_connect->setText("Disconnect");
 	m_splash->hide();
+
+	statusBar()->showMessage("Connected to "+name);
+
+	//Register this IDE as a core debugger.
+	dsb_net_send_debugger(hostsock,0);
+
 	show();
 }
 
@@ -126,9 +140,18 @@ void DSBIde::make_menu()
 void DSBIde::make_toolbar()
 {
 	m_bar = new QToolBar();
+	m_bar_connect = m_bar->addAction(QIcon(":/icons/dharc-16.png"),"DHARC");
+	m_bar->addSeparator();
 	m_bar_connect = m_bar->addAction(QIcon(":/icons/connect.png"),"Connect");
 	m_bar->addSeparator();
-	m_bar->addAction(QIcon(":/icons/application_tile_horizontal.png"), "Split");
+	m_act_showtree = m_bar->addAction(QIcon(":/icons/application_side_tree.png"), "Tree");
+	m_act_split = m_bar->addAction(QIcon(":/icons/application_tile_horizontal.png"), "Split");
+	m_bar->addAction(QIcon(":/icons/application_double.png"), "Undock");
+
+	m_act_showtree->setCheckable(true);
+	m_act_showtree->setChecked(true);
+	m_act_split->setCheckable(true);
+
 	addToolBar(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
@@ -139,6 +162,15 @@ void DSBIde::toolclick(QAction *a)
 	{
 		m_connect->show();
 	}
+	else if (a->text() == "Disconnect")
+	{
+		statusBar()->showMessage("Disconnected");
+		dsb_net_disconnect(hostsock);
+		m_treeview->clear();
+		m_tabviews->clear();
+		m_bar_connect->setIcon(QIcon(":/icons/connect.png"));
+		m_bar_connect->setText("Connect");
+	}
 }
 
 void DSBIde::closeView(int index)
@@ -146,6 +178,11 @@ void DSBIde::closeView(int index)
 	QWidget *cur = m_tabviews->widget(index);
 	m_tabviews->removeTab(index);
 	delete cur;
+}
+
+void DSBIde::viewTabChanged(int index)
+{
+
 }
 
 void DSBIde::showSplash()
@@ -171,6 +208,7 @@ void DSBIde::newView(const NID_t &d1, const NID_t &d2, const NID_t &nid)
 	{
 		nv->addHARC(d1,d2,nid);
 		m_tabviews->addTab(nv,nv->title());
+		m_tabviews->setCurrentWidget(nv);
 	}
 }
 

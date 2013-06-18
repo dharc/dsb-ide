@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * errlog.h
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 18 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,57 +32,28 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#ifndef ERRLOG_H_
+#define ERRLOG_H_
 
-#include <qt4/QtGui/QMainWindow>
 
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ErrorLogger;
-class ConnectDialog;
-class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
+#include <qt4/QtGui/QWidget>
 
-class DSBIde : public QMainWindow
+class QListWidget;
+class QLayout;
+
+class ErrorLogger : public QWidget
 {
 	Q_OBJECT
 
 public:
-	DSBIde();
-	~DSBIde();
+	ErrorLogger();
+	~ErrorLogger();
 
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	ErrorLogger *errorLogger() { return m_errlogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+	void addError(unsigned short type, const char *data);
 
 private:
-	void make_toolbar();
-	void make_menu();
-
-	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ErrorLogger *m_errlogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
-	QAction *m_act_showtree;
-	QAction *m_act_split;
-
-public slots:
-	void toolclick(QAction *);
-	void closeView(int index);
-	void viewTabChanged(int);
+	QListWidget *m_list;
 };
 
 
-#endif /* IDE_H_ */
+#endif /* ERRLOG_H_ */

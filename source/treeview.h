@@ -45,6 +45,7 @@ class QLineEdit;
 class QPushButton;
 class QMenu;
 class QPoint;
+class QString;
 
 class AddObject : public QWidget
 {
@@ -97,15 +98,31 @@ public:
 	TreeView();
 	~TreeView();
 
-	void setRoot(const NID_t &n);
+	void setRoot(const NID_t &n, QString &name);
+	void clear();
 
 private:
+	static const unsigned int ACTION_NONE = 0;
+	static const unsigned int ACTION_ADD = 1;
+	static const unsigned int ACTION_DELETE = 2;
+	static const unsigned int ACTION_EDIT = 3;
+	static const unsigned int ACTION_EDITDEF = 4;
+	static const unsigned int ACTION_VIEW = 5;
+	static const unsigned int ACTION_CLONE = 6;
+	static const unsigned int ACTION_MOVE = 7;
+	static const unsigned int ACTION_LINK = 8;
+	static const unsigned int ACTION_HELP = 9;
+	static const unsigned int ACTION_END = 10;
+
 	QTreeWidget *m_tree;
 	QToolBar *m_bar;
 	AddObject *m_addobj;
 	EditObject *m_editobj;
 	QMenu *m_treemenu;
 	QTreeWidgetItem *m_menuitem;
+
+	QAction *m_acts[ACTION_END];
+	unsigned int m_curact;
 
 	void make_toolbar(QLayout *);
 

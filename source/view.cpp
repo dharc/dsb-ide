@@ -41,7 +41,7 @@ static QHash<QString,DSBView*(*)()> views;
 static QHash<int,QString> patterns;
 
 DSBView::DSBView()
-	: QWidget()
+	: QMainWindow()
 {
 
 }

@@ -36,8 +36,8 @@ either expressed or implied, of the FreeBSD Project.
 #define CONNECTDIAG_H_
 
 #include <qt4/QtGui/QWidget>
+#include <qt4/QtGui/QLineEdit>
 
-class QLineEdit;
 class QPushButton;
 class QLabel;
 
@@ -48,6 +48,8 @@ class ConnectDialog : public QWidget
 public:
 		ConnectDialog();
 		~ConnectDialog();
+
+		QString getHost() { return m_host->text(); }
 
 private:
 		QLabel *m_message;

@@ -1,7 +1,7 @@
 /*
- * ide.h
+ * errlog.cpp
  *
- *  Created on: 14 Jun 2013
+ *  Created on: 18 Jun 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,57 +32,57 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef IDE_H_
-#define IDE_H_
+#include <dsb/errors.h>
+#include "errlog.h"
+#include <qt4/QtGui/QVBoxLayout>
+#include <qt4/QtGui/QListWidget>
 
-#include <qt4/QtGui/QMainWindow>
-
-class QToolBar;
-class TreeView;
-class QTabWidget;
-class MessageLogger;
-class ErrorLogger;
-class ConnectDialog;
-class QAction;
-class QSplashScreen;
-typedef struct NID NID_t;
-
-class DSBIde : public QMainWindow
+ErrorLogger::ErrorLogger()
 {
-	Q_OBJECT
+	QVBoxLayout *mainlayout = new QVBoxLayout();
+	setLayout(mainlayout);
+	setAutoFillBackground(true);
 
-public:
-	DSBIde();
-	~DSBIde();
+	m_list = new QListWidget();
+	mainlayout->addWidget(m_list);
 
-	void connected();
-	MessageLogger *messageLogger() { return m_msglogger; };
-	ErrorLogger *errorLogger() { return m_errlogger; };
-	void showSplash();
-	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+	show();
+}
 
-private:
-	void make_toolbar();
-	void make_menu();
+ErrorLogger::~ErrorLogger()
+{
 
-	QToolBar *m_bar;
-	QAction *m_bar_connect;
-	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
-	QTabWidget *m_tabsys;
-	MessageLogger *m_msglogger;
-	ErrorLogger *m_errlogger;
-	ConnectDialog *m_connect;
-	QSplashScreen *m_splash;
-	QAction *m_act_showtree;
-	QAction *m_act_split;
+}
 
-public slots:
-	void toolclick(QAction *);
-	void closeView(int index);
-	void viewTabChanged(int);
-};
+void ErrorLogger::addError(unsigned short type, const char *data)
+{
+	QListWidgetItem *item = 0;
+	int cat = type & 0xFF000;
 
+	if (cat == ERR_ERROR)
+	{
+		item = new QListWidgetItem(QIcon(":/icons/exclamation.png"),QString(dsb_log_str(type)) + ": " + data);
+	}
+	else if (cat == WARN_START)
+	{
+		item = new QListWidgetItem(QIcon(":/icons/error.png"),QString(dsb_log_str(type)) + ": " + data);
+	}
+	else if (cat == INFO_START)
+	{
+		item = new QListWidgetItem(QIcon(":/icons/information.png"),QString(dsb_log_str(type)) + ": " + data);
+	}
+	else if (cat == DEBUG_START)
+	{
+		item = new QListWidgetItem(QIcon(":/icons/information.png"),QString(dsb_log_str(type)) + ": " + data);
+	}
+	else
+	{
+		item = new QListWidgetItem(QIcon(":/icons/error.png"),QString(dsb_log_str(type)) + ": " + data);
+	}
 
-#endif /* IDE_H_ */
+	if (item != 0)
+	{
+		m_list->insertItem(0,item);
+	}
+}
+

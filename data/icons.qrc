@@ -8,16 +8,18 @@
 		<file>icons/email.png</file>
 		<file>icons/email_go.png</file>
 		<file>icons/email_open.png</file>
-		<file>icons/chart_line.png</file>
-		<file>icons/chart_line_add.png</file>
-		<file>icons/chart_line_delete.png</file>
-		<file>icons/chart_line_edit.png</file>
-		<file>icons/chart_line_error.png</file>
-		<file>icons/chart_line_link.png</file>
+		<file>icons/email_add.png</file>
+		<file>icons/chart_organisation_add.png</file>
+		<file>icons/chart_organisation_delete.png</file>
 		<file>icons/add.png</file>
 		<file>icons/hourglass.png</file>
 		<file>icons/folder.png</file>
 		<file>icons/script.png</file>
+		<file>icons/folder_page.png</file>
+		<file>icons/script_save.png</file>
+		<file>icons/script_edit.png</file>
+		<file>icons/page.png</file>
+		<file>icons/page_save.png</file>
 		<file>icons/disk.png</file>
 		<file>icons/bug.png</file>
 		<file>icons/table_edit.png</file>
@@ -38,5 +40,17 @@
 		<file>icons/blob-bool.png</file>
 		<file>icons/blob-label.png</file>
 		<file>icons/application_tile_horizontal.png</file>
+		<file>icons/exclamation.png</file>
+		<file>icons/error.png</file>
+		<file>icons/information.png</file>
+		<file>icons/page_copy.png</file>
+		<file>icons/link.png</file>
+		<file>icons/eye.png</file>
+		<file>icons/cursor.png</file>
+		<file>icons/cut.png</file>
+		<file>icons/help.png</file>
+		<file>icons/dharc-16.png</file>
+		<file>icons/application_double.png</file>
+		<file>icons/application_side_tree.png</file>
 	</qresource>
 </RCC>
