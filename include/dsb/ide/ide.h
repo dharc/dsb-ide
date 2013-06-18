@@ -82,6 +82,7 @@ public slots:
 	void toolclick(QAction *);
 	void closeView(int index);
 	void viewTabChanged(int);
+	void showtreeToggle(bool val);
 };
 
 

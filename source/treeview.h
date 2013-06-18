@@ -90,6 +90,27 @@ public slots:
 	void cancelclicked();
 };
 
+/*class PasteHarc : public QWidget
+{
+	Q_OBJECT
+
+public:
+	PasteHarc();
+	~PasteHarc();
+
+	void showEditObject(QTreeWidgetItem *item);
+
+private:
+	QLineEdit *m_value;
+	QPushButton *m_save;
+	QPushButton *m_cancel;
+	QTreeWidgetItem *m_item;
+
+public slots:
+	void editclicked();
+	void cancelclicked();
+};*/
+
 class TreeView : public QWidget
 {
 	Q_OBJECT
@@ -98,7 +119,7 @@ public:
 	TreeView();
 	~TreeView();
 
-	void setRoot(const NID_t &n, QString &name);
+	void setRoot(const NID_t &n, QString &name, bool comp);
 	void clear();
 
 private:
@@ -112,7 +133,9 @@ private:
 	static const unsigned int ACTION_MOVE = 7;
 	static const unsigned int ACTION_LINK = 8;
 	static const unsigned int ACTION_HELP = 9;
-	static const unsigned int ACTION_END = 10;
+	static const unsigned int ACTION_HOME = 10;
+	static const unsigned int ACTION_PASTE = 11;
+	static const unsigned int ACTION_END = 12;
 
 	QTreeWidget *m_tree;
 	QToolBar *m_bar;
@@ -120,6 +143,7 @@ private:
 	EditObject *m_editobj;
 	QMenu *m_treemenu;
 	QTreeWidgetItem *m_menuitem;
+	QTreeWidgetItem *m_copyitem;
 
 	QAction *m_acts[ACTION_END];
 	unsigned int m_curact;
@@ -133,6 +157,7 @@ public slots:
 	void menuclick(QAction *);
 	void doubleclick(QTreeWidgetItem *item, int col);
 	void showContextMenu(const QPoint &pnt);
+	void currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *prev);
 };
 
 #endif /* TREEVIEW_H_ */

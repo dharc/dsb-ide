@@ -225,12 +225,15 @@ TreeView::TreeView()
 	m_addobj = new AddObject();
 	m_editobj = new EditObject();
 
+	m_copyitem = 0;
+
 	setWindowTitle("Tree Browser");
 	//resize(600,400);
 	show();
 
 	connect(m_tree,SIGNAL(itemCollapsed(QTreeWidgetItem *)),this,SLOT(collapsed(QTreeWidgetItem *)));
 	connect(m_tree,SIGNAL(itemExpanded(QTreeWidgetItem *)),this,SLOT(expanded(QTreeWidgetItem *)));
+	connect(m_tree,SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),this,SLOT(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 	//connect(m_tree,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(doubleclick(QTreeWidgetItem*,int)));
 }
 
@@ -250,8 +253,28 @@ void TreeView::make_toolbar(QLayout *l)
 	m_acts[ACTION_VIEW] = m_bar->addAction(QIcon(":/icons/eye.png"),"View");
 	m_acts[ACTION_CLONE] = m_bar->addAction(QIcon(":/icons/page_copy.png"),"Clone");
 	m_acts[ACTION_MOVE] = m_bar->addAction(QIcon(":/icons/cut.png"),"Move");
+	m_acts[ACTION_PASTE] = m_bar->addAction(QIcon(":/icons/page_paste.png"),"Paste");
 	m_acts[ACTION_LINK] = m_bar->addAction(QIcon(":/icons/link.png"),"Connect");
 	m_acts[ACTION_HELP] = m_bar->addAction(QIcon(":/icons/help.png"),"Help");
+	m_acts[ACTION_HOME] = m_bar->addAction(QIcon(":/icons/house.png"),"Add Root");
+
+	QMenu *menu;
+
+	menu = new QMenu();
+	menu->addAction("Default View");
+	menu->addAction("View As");
+	m_acts[ACTION_VIEW]->setMenu(menu);
+
+	menu = new QMenu();
+	menu->addAction("Default Editor");
+	menu->addAction("Assembler");
+	m_acts[ACTION_EDITDEF]->setMenu(menu);
+
+	menu = new QMenu();
+	menu->addAction("Reference");
+	menu->addAction("Shallow Clone");
+	menu->addAction("Deep Clone");
+	m_acts[ACTION_CLONE]->setMenu(menu);
 
 	//l->addWidget(m_bar);
 	ide->addToolBar(Qt::LeftToolBarArea,m_bar);
@@ -302,15 +325,88 @@ void TreeView::toolclick(QAction *a)
 		if (curitem->parent() == 0) return;
 		//m_editobj->showEditObject(item);
 		NID_t d1 = curitem->parent()->data(1,Qt::UserRole).value<NID>();
-		NID_t d2 = curitem->data(1,Qt::UserRole).value<NID>();
+		NID_t d2 = curitem->data(0,Qt::UserRole).value<NID>();
 		NID_t v = curitem->data(1,Qt::UserRole).value<NID>();
 		ide->newView(d1,d2,v);
+	}
+	else if (act == ACTION_HOME)
+	{
+		NID_t r = curitem->data(1,Qt::UserRole).value<NID>();
+		NID_t k = curitem->data(0,Qt::UserRole).value<NID>();
+		char buf[100];
+		dsb_nid_toStr(&k,buf,100);
+		QString str(buf);
+		setRoot(r,str,false);
 	}
 
 	//if (a->text() == "Add")
 	//{
 	//	m_addobj->showAddObject(m_tree->currentItem());
 	//}
+}
+
+void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *prev)
+{
+	//Decide what actions are valid for this item.
+
+	if (current != 0)
+	{
+		m_acts[ACTION_ADD]->setEnabled(true);
+		m_acts[ACTION_DELETE]->setEnabled(true);
+
+		if (m_copyitem == 0)
+		{
+			m_acts[ACTION_PASTE]->setEnabled(false);
+		}
+		else
+		{
+			m_acts[ACTION_PASTE]->setEnabled(true);
+		}
+
+		//Are we a root.
+		if (current->parent() == 0)
+		{
+			m_acts[ACTION_HOME]->setEnabled(false);
+			m_acts[ACTION_EDIT]->setEnabled(false);
+			m_acts[ACTION_EDITDEF]->setEnabled(false);
+			m_acts[ACTION_VIEW]->setEnabled(false);
+			m_acts[ACTION_MOVE]->setEnabled(false);
+		}
+		else
+		{
+			NID_t obj = current->parent()->data(1,Qt::UserRole).value<NID>();
+			NID_t key = current->data(0,Qt::UserRole).value<NID>();
+			NID_t def;
+			int eval;
+
+			m_acts[ACTION_VIEW]->setEnabled(true);
+			m_acts[ACTION_MOVE]->setEnabled(true);
+
+			dsb_getdef(&obj,&key,&def,&eval);
+
+			if (dsb_pattern_isA(&def,DSB_PATTERN_BYTECODE))
+			{
+				m_acts[ACTION_EDIT]->setEnabled(false);
+				m_acts[ACTION_EDITDEF]->setEnabled(true);
+				m_acts[ACTION_EDITDEF]->setIcon(QIcon(":/icons/script_edit.png"));
+			}
+			else
+			{
+				m_acts[ACTION_EDIT]->setEnabled(true);
+				m_acts[ACTION_EDITDEF]->setEnabled(true);
+				m_acts[ACTION_EDITDEF]->setIcon(QIcon(":/icons/script_add.png"));
+			}
+
+			m_acts[ACTION_HOME]->setEnabled(true);
+		}
+	}
+	else
+	{
+		for (int i=1; i<ACTION_END; i++)
+		{
+			m_acts[i]->setEnabled(false);
+		}
+	}
 }
 
 void TreeView::menuclick(QAction *a)
@@ -363,14 +459,21 @@ void TreeView::showContextMenu(const QPoint &pnt)
 	m_treemenu->exec(globalPos);
 }
 
-void TreeView::setRoot(const NID_t &root, QString &name)
+void TreeView::setRoot(const NID_t &root, QString &name, bool comp)
 {
 	QTreeWidgetItem *item;
 	QTreeWidgetItem *item2;
 
 	item = new QTreeWidgetItem();
 	item->setText(0,name);
-	item->setIcon(0,QIcon(":/icons/house.png"));
+	if (comp)
+	{
+		item->setIcon(0,QIcon(":/icons/computer.png"));
+	}
+	else
+	{
+		item->setIcon(0,QIcon(":/icons/blob-harc.png"));
+	}
 	item->setData(1,Qt::UserRole,QVariant::fromValue(root));
 	m_tree->insertTopLevelItem(0,item);
 

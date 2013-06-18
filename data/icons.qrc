@@ -18,6 +18,7 @@
 		<file>icons/folder_page.png</file>
 		<file>icons/script_save.png</file>
 		<file>icons/script_edit.png</file>
+		<file>icons/script_add.png</file>
 		<file>icons/page.png</file>
 		<file>icons/page_save.png</file>
 		<file>icons/disk.png</file>
@@ -52,5 +53,7 @@
 		<file>icons/dharc-16.png</file>
 		<file>icons/application_double.png</file>
 		<file>icons/application_side_tree.png</file>
+		<file>icons/computer.png</file>
+		<file>icons/page_paste.png</file>
 	</qresource>
 </RCC>

@@ -115,7 +115,7 @@ DSBIde::~DSBIde()
 void DSBIde::connected()
 {
 	QString name = m_connect->getHost();
-	m_treeview->setRoot(Root, name);
+	m_treeview->setRoot(Root, name, true);
 	m_bar_connect->setIcon(QIcon(":/icons/disconnect.png"));
 	m_bar_connect->setText("Disconnect");
 	m_splash->hide();
@@ -154,6 +154,19 @@ void DSBIde::make_toolbar()
 
 	addToolBar(m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
+	connect(m_act_showtree,SIGNAL(toggled(bool)),this,SLOT(showtreeToggle(bool)));
+}
+
+void DSBIde::showtreeToggle(bool val)
+{
+	if (val)
+	{
+		m_treeview->show();
+	}
+	else
+	{
+		m_treeview->hide();
+	}
 }
 
 void DSBIde::toolclick(QAction *a)
