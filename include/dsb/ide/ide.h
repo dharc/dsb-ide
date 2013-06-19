@@ -58,6 +58,7 @@ public:
 	void connected();
 	MessageLogger *messageLogger() { return m_msglogger; };
 	ErrorLogger *errorLogger() { return m_errlogger; };
+	TreeView *tree() { return m_treeview; };
 	void showSplash();
 	void hideSplash();
 	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);

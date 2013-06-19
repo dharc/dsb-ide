@@ -42,6 +42,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/pattern_types.h>
 #include <dsb/vm.h>
 #include <dsb/globals.h>
+#include <dsb/clone.h>
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -51,6 +52,8 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QAction>
 #include <qt4/QtGui/QMenu>
 #include <qt4/QtGui/QHeaderView>
+
+#include <iostream>
 
 Q_DECLARE_METATYPE(NID);
 
@@ -117,6 +120,9 @@ void AddObject::addclicked()
 	dsb_set(&root,&key,&value);
 	dsb_dict(&root,&key);
 
+	ide->tree()->clearChildren(m_item);
+	ide->tree()->addHiddenChildren(m_item,root);
+
 	hide();
 }
 
@@ -144,7 +150,7 @@ EditObject::EditObject()
 	m_cancel = new QPushButton("Cancel");
 	buttonlayout->addWidget(m_cancel);
 
-	setWindowTitle("Add Hyperarc");
+	setWindowTitle("Edit Value");
 
 	connect(m_save, SIGNAL(clicked()), this, SLOT(editclicked()));
 	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
@@ -161,6 +167,7 @@ void EditObject::showEditObject(QTreeWidgetItem *item)
 {
 	m_item = item;
 	m_value->setText(m_item->text(1));
+	m_value->selectAll();
 	show();
 }
 
@@ -183,6 +190,108 @@ void EditObject::editclicked()
 	}
 
 	dsb_set(&root,&key,&value);
+
+	bool wasexpanded = m_item->isExpanded();
+	ide->tree()->updateItemDetails(m_item);
+	if (wasexpanded) m_item->setExpanded(true);
+
+	hide();
+}
+
+void PasteObject::cancelclicked()
+{
+	hide();
+}
+
+//---------------------
+
+PasteObject::PasteObject()
+	: QWidget(0,Qt::Dialog)
+{
+	QVBoxLayout *mainlayout = new QVBoxLayout();
+	setLayout(mainlayout);
+
+	m_value = new QLineEdit();
+	m_value->setAutoFillBackground(true);
+	mainlayout->addWidget(m_value);
+
+	QHBoxLayout *buttonlayout = new QHBoxLayout();
+	mainlayout->addLayout(buttonlayout);
+	m_save = new QPushButton("Paste");
+	buttonlayout->addWidget(m_save);
+	m_cancel = new QPushButton("Cancel");
+	buttonlayout->addWidget(m_cancel);
+
+	setWindowTitle("Paste Object");
+
+	connect(m_save, SIGNAL(clicked()), this, SLOT(pasteclicked()));
+	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
+
+	m_src = 0;
+	m_dest = 0;
+	m_copyact = 0;
+}
+
+PasteObject::~PasteObject()
+{
+
+}
+
+void PasteObject::showPasteObject(QTreeWidgetItem *src, QTreeWidgetItem *dest, unsigned int copyact)
+{
+	m_src = src;
+	m_dest = dest;
+	m_copyact = copyact;
+	m_value->setText(m_src->text(0));
+	m_value->selectAll();
+	show();
+}
+
+void PasteObject::pasteclicked()
+{
+	NID_t tmp;
+	NID_t dobj;
+	NID_t key;
+	NID_t val;
+
+	//Get the relevant NIDs from the items.
+	dobj = m_dest->data(1,Qt::UserRole).value<NID>();
+	//key = m_src->data(0,Qt::UserRole).value<NID>();
+	dsb_nid_fromStr(m_value->text().toAscii().constData(),&key);
+	val = m_src->data(1,Qt::UserRole).value<NID>();
+
+	//Check for an existing key being overwritten.
+	dsb_get(&dobj,&key,&tmp);
+	if (dsb_nid_eq(&tmp,&Null) == 0)
+	{
+		//RENAME
+	}
+
+	if (m_copyact == TreeView::ACTION_COPYREF)
+	{
+
+		//OK to copy reference.
+		dsb_set(&dobj,&key,&val);
+		dsb_dict(&dobj,&key);
+	}
+	else if (m_copyact == TreeView::ACTION_SHALLOW)
+	{
+		//Clone first then put new reference in...
+		dsb_new(&dobj,&tmp);
+		dsb_clone_shallow(&val,&tmp);
+		val = tmp;
+		dsb_set(&dobj,&key,&tmp);
+		dsb_dict(&dobj,&key);
+	}
+
+	//dest->setExpanded(false);
+
+	bool wasexpanded = m_dest->isExpanded();
+
+	ide->tree()->clearChildren(m_dest);
+	ide->tree()->addHiddenChildren(m_dest,dobj);
+
+	if (wasexpanded) m_dest->setExpanded(true);
 
 	hide();
 }
@@ -224,6 +333,7 @@ TreeView::TreeView()
 
 	m_addobj = new AddObject();
 	m_editobj = new EditObject();
+	m_pastediag = new PasteObject();
 
 	m_copyitem = 0;
 
@@ -271,14 +381,15 @@ void TreeView::make_toolbar(QLayout *l)
 	m_acts[ACTION_EDITDEF]->setMenu(menu);
 
 	menu = new QMenu();
-	menu->addAction("Reference");
-	menu->addAction("Shallow Clone");
-	menu->addAction("Deep Clone");
+	m_acts[ACTION_COPYREF] = menu->addAction("Reference");
+	m_acts[ACTION_SHALLOW] = menu->addAction("Shallow Clone");
+	m_acts[ACTION_DEEP] = menu->addAction("Deep Clone");
 	m_acts[ACTION_CLONE]->setMenu(menu);
 
 	//l->addWidget(m_bar);
 	ide->addToolBar(Qt::LeftToolBarArea,m_bar);
 	connect(m_bar, SIGNAL(actionTriggered(QAction*)), this, SLOT(toolclick(QAction*)));
+	//connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(toolclick(QAction*)));
 }
 
 void TreeView::toolclick(QAction *a)
@@ -297,6 +408,10 @@ void TreeView::toolclick(QAction *a)
 	if (act == ACTION_ADD)
 	{
 		m_addobj->showAddObject(curitem);
+	}
+	else if (act == ACTION_EDIT)
+	{
+		m_editobj->showEditObject(curitem);
 	}
 	else if (act == ACTION_EDITDEF)
 	{
@@ -338,11 +453,32 @@ void TreeView::toolclick(QAction *a)
 		QString str(buf);
 		setRoot(r,str,false);
 	}
+	else if (act == ACTION_PASTE)
+	{
+		paste(m_copyitem, curitem, m_copyact);
+	}
+	else if (act == ACTION_CLONE)
+	{
+		m_copyact = ACTION_COPYREF;
+		m_copyitem = curitem;
+		m_acts[ACTION_PASTE]->setEnabled(true);
+	}
+	else if (act == ACTION_COPYREF || act == ACTION_SHALLOW || act == ACTION_DEEP)
+	{
+		m_copyact = act;
+		m_copyitem = curitem;
+		m_acts[ACTION_PASTE]->setEnabled(true);
+	}
 
 	//if (a->text() == "Add")
 	//{
 	//	m_addobj->showAddObject(m_tree->currentItem());
 	//}
+}
+
+void TreeView::paste(QTreeWidgetItem *source, QTreeWidgetItem *dest, unsigned int copyaction)
+{
+	m_pastediag->showPasteObject(source,dest,copyaction);
 }
 
 void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *prev)
@@ -402,7 +538,7 @@ void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *pre
 	}
 	else
 	{
-		for (int i=1; i<ACTION_END; i++)
+		for (unsigned int i=1; i<ACTION_END; i++)
 		{
 			m_acts[i]->setEnabled(false);
 		}
@@ -462,7 +598,6 @@ void TreeView::showContextMenu(const QPoint &pnt)
 void TreeView::setRoot(const NID_t &root, QString &name, bool comp)
 {
 	QTreeWidgetItem *item;
-	QTreeWidgetItem *item2;
 
 	item = new QTreeWidgetItem();
 	item->setText(0,name);
@@ -477,15 +612,21 @@ void TreeView::setRoot(const NID_t &root, QString &name, bool comp)
 	item->setData(1,Qt::UserRole,QVariant::fromValue(root));
 	m_tree->insertTopLevelItem(0,item);
 
+	addHiddenChildren(item,root);
+}
+
+void TreeView::addHiddenChildren(QTreeWidgetItem *item, const NID &base)
+{
+	QTreeWidgetItem *item2;
 	struct DSBIterator it;
 	const NID_t *p;
-	dsb_iterator_begin(&it,&root);
+	dsb_iterator_begin(&it,&base);
 	p = dsb_iterator_next(&it);
 	while (p != 0)
 	{
+		//Make a new sparse tree item for each child
 		char buf[100];
-		NID_t v;
-		dsb_nid_toStr(p,buf,100);
+		dsb_nid_pretty(p,buf,100);
 		item2 = new QTreeWidgetItem(item);
 		item2->setText(0,buf);
 		item2->setData(0,Qt::UserRole,QVariant::fromValue(*p));
@@ -499,14 +640,76 @@ void TreeView::clear()
 	m_tree->clear();
 }
 
-void TreeView::expanded(QTreeWidgetItem *item)
+void TreeView::updateItemDetails(QTreeWidgetItem *item)
+{
+	char buf[100];
+	NID_t key;
+	NID_t value;
+	NID_t root = item->parent()->data(1,Qt::UserRole).value<NID>();
+	key = item->data(0,Qt::UserRole).value<NID>();
+
+	//Update the items value.
+	dsb_get(&root,&key,&value);
+	dsb_nid_pretty(&value,buf,100);
+	item->setText(1,buf);
+	item->setData(1,Qt::UserRole,QVariant::fromValue(value));
+
+	//Now generate partial children.
+	clearChildren(item);
+	addHiddenChildren(item,value);
+
+	int type;
+	int eval;
+	bool definition = false;
+
+	type = dsb_pattern_what(&value);
+	dsb_getdef(&root,&key,&value,&eval);
+
+	if (dsb_pattern_isA(&value,DSB_PATTERN_BYTECODE))
+	{
+		item->setForeground(0,QBrush(QColor("blue")));
+		definition = true;
+	}
+
+	switch (type)
+	{
+	case DSB_PATTERN_INTEGER:	if (definition)
+								{
+									item->setIcon(0,QIcon(":/icons/blob-int-blue.png"));
+								}
+								else
+								{
+									item->setIcon(0,QIcon(":/icons/blob-int.png"));
+								}
+								item->setForeground(1,QBrush(QColor("blue")));
+								break;
+	case DSB_PATTERN_BOOLEAN:	item->setIcon(0,QIcon(":/icons/blob-bool.png"));
+								{
+									QFont tmpfont = item->font(1);
+									tmpfont.setBold(true);
+									item->setFont(1,tmpfont);
+								}
+								break;
+	default:					if (item->childCount() == 0)
+								{
+									item->setIcon(0,QIcon(":/icons/blob-label.png"));
+								}
+								else
+								{
+									QFont tmpfont = item->font(1);
+									tmpfont.setStyle(QFont::StyleItalic);
+									item->setIcon(0,QIcon(":/icons/blob-harc.png"));
+									item->setFont(1,tmpfont);
+									item->setForeground(1,QBrush(QColor("grey")));
+								}
+								break;
+	}
+}
+
+void TreeView::refreshItem(QTreeWidgetItem *item)
 {
 	QTreeWidgetItem *item2;
-	QTreeWidgetItem *item3;
-	NID_t key;
 	NID_t root;
-	NID_t value;
-	char buf[100];
 
 	root = item->data(1,Qt::UserRole).value<NID>();
 
@@ -514,75 +717,13 @@ void TreeView::expanded(QTreeWidgetItem *item)
 	for (int i=0; i<item->childCount(); i++)
 	{
 		item2 = item->child(i);
-		key = item2->data(0,Qt::UserRole).value<NID>();
-
-		dsb_get(&root,&key,&value);
-		dsb_nid_toStr(&value,buf,100);
-		item2->setText(1,buf);
-		item2->setData(1,Qt::UserRole,QVariant::fromValue(value));
-
-		//Now generate partial children.
-		struct DSBIterator it;
-		const NID_t *p;
-		dsb_iterator_begin(&it,&value);
-		p = dsb_iterator_next(&it);
-		while (p != 0)
-		{
-			dsb_nid_toStr(p,buf,100);
-			item3 = new QTreeWidgetItem(item2);
-			item3->setText(0,buf);
-			item3->setData(0,Qt::UserRole,QVariant::fromValue(*p));
-			p = dsb_iterator_next(&it);
-		}
-		dsb_iterator_end(&it);
-
-		int type;
-		int eval;
-		bool definition = false;
-
-		type = dsb_pattern_what(&value);
-		dsb_getdef(&root,&key,&value,&eval);
-
-		if (dsb_pattern_isA(&value,DSB_PATTERN_BYTECODE))
-		{
-			item2->setForeground(0,QBrush(QColor("blue")));
-			definition = true;
-		}
-
-		switch (type)
-		{
-		case DSB_PATTERN_INTEGER:	if (definition)
-									{
-										item2->setIcon(0,QIcon(":/icons/blob-int-blue.png"));
-									}
-									else
-									{
-										item2->setIcon(0,QIcon(":/icons/blob-int.png"));
-									}
-									item2->setForeground(1,QBrush(QColor("blue")));
-									break;
-		case DSB_PATTERN_BOOLEAN:	item2->setIcon(0,QIcon(":/icons/blob-bool.png"));
-									{
-										QFont tmpfont = item2->font(1);
-										tmpfont.setBold(true);
-										item2->setFont(1,tmpfont);
-									}
-									break;
-		default:					if (item2->childCount() == 0)
-									{
-										item2->setIcon(0,QIcon(":/icons/blob-label.png"));
-									}
-									else
-									{
-										QFont tmpfont = item2->font(1);
-										tmpfont.setStyle(QFont::StyleItalic);
-										item2->setIcon(0,QIcon(":/icons/blob-harc.png"));
-										item2->setFont(1,tmpfont);
-										item2->setForeground(1,QBrush(QColor("grey")));
-									}
-									break;
-		}
+		updateItemDetails(item2);
 	}
+}
+
+void TreeView::expanded(QTreeWidgetItem *item)
+{
+	refreshItem(item);
 }
 
 void TreeView::collapsed(QTreeWidgetItem *item)
@@ -592,13 +733,18 @@ void TreeView::collapsed(QTreeWidgetItem *item)
 	for (int i=0; i<item->childCount(); i++)
 	{
 		item2 = item->child(i);
-		item2->setExpanded(false);
-		QList<QTreeWidgetItem*> children = item2->takeChildren();
+		clearChildren(item2);
+	}
+}
 
-		for (int j=0; j<children.count(); j++)
-		{
-			delete children.at(j);
-		}
+void TreeView::clearChildren(QTreeWidgetItem *item)
+{
+	item->setExpanded(false);
+	QList<QTreeWidgetItem*> children = item->takeChildren();
+
+			for (int j=0; j<children.count(); j++)
+	{
+		delete children.at(j);
 	}
 }
 

@@ -36,6 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/nid.h>
 #include "dsb/ide/view.h"
 #include <dsb/wrap.h>
+#include <dsb/string.h>
 #include <dsb/pattern_types.h>
 #include <dsb/pattern.h>
 #include <dsb/iterator.h>
@@ -103,6 +104,7 @@ void DisplayView::drawElement(QPainter &painter, const NID_t *ele)
 	switch(type)
 	{
 	case DSB_PATTERN_SHAPE_LINE:	drawLine(painter,ele); break;
+	case DSB_PATTERN_SHAPE_TEXT:	drawText(painter,ele); break;
 	default: break;
 	}
 }
@@ -120,6 +122,21 @@ void DisplayView::drawLine(QPainter &painter, const NID_t *ele)
 
 	painter.setPen(Qt::red);
 	painter.drawLine(x1,y1,x2,y2);
+}
+
+void DisplayView::drawText(QPainter &painter, const NID_t *ele)
+{
+	int tx = 0;
+	int ty = 0;
+	char buf[500];
+	NID_t text;
+	dsb_getnzi(ele,"x",&tx);
+	dsb_getnzi(ele,"y",&ty);
+	dsb_getnzn(ele,"text",&text);
+	dsb_string_ntoc(buf,500,&text);
+
+	painter.setPen(Qt::red);
+	painter.drawText(tx,ty,buf);
 }
 
 static struct Module dispmod;

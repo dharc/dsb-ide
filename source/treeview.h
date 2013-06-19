@@ -36,6 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #define TREEVIEW_H_
 
 #include <qt4/QtGui/QWidget>
+#include <qt4/QtGui/QDialog>
 
 typedef struct NID NID_t;
 class QTreeWidget;
@@ -90,26 +91,28 @@ public slots:
 	void cancelclicked();
 };
 
-/*class PasteHarc : public QWidget
+class PasteObject : public QWidget
 {
 	Q_OBJECT
 
 public:
-	PasteHarc();
-	~PasteHarc();
+	PasteObject();
+	~PasteObject();
 
-	void showEditObject(QTreeWidgetItem *item);
+	void showPasteObject(QTreeWidgetItem *src, QTreeWidgetItem *dest, unsigned int copyaction);
 
 private:
 	QLineEdit *m_value;
 	QPushButton *m_save;
 	QPushButton *m_cancel;
-	QTreeWidgetItem *m_item;
+	QTreeWidgetItem *m_src;
+	QTreeWidgetItem *m_dest;
+	unsigned int m_copyact;
 
 public slots:
-	void editclicked();
+	void pasteclicked();
 	void cancelclicked();
-};*/
+};
 
 class TreeView : public QWidget
 {
@@ -119,10 +122,6 @@ public:
 	TreeView();
 	~TreeView();
 
-	void setRoot(const NID_t &n, QString &name, bool comp);
-	void clear();
-
-private:
 	static const unsigned int ACTION_NONE = 0;
 	static const unsigned int ACTION_ADD = 1;
 	static const unsigned int ACTION_DELETE = 2;
@@ -135,20 +134,36 @@ private:
 	static const unsigned int ACTION_HELP = 9;
 	static const unsigned int ACTION_HOME = 10;
 	static const unsigned int ACTION_PASTE = 11;
-	static const unsigned int ACTION_END = 12;
+	static const unsigned int ACTION_COPYREF = 12;
+	static const unsigned int ACTION_SHALLOW = 13;
+	static const unsigned int ACTION_DEEP = 14;
+	static const unsigned int ACTION_END = 15;
+
+	void setRoot(const NID_t &n, QString &name, bool comp);
+	void clear();
+	void updateItemDetails(QTreeWidgetItem *item);
+	void addHiddenChildren(QTreeWidgetItem *item, const NID &base);
+	void clearChildren(QTreeWidgetItem *item);
+
+private:
 
 	QTreeWidget *m_tree;
 	QToolBar *m_bar;
 	AddObject *m_addobj;
 	EditObject *m_editobj;
+	PasteObject *m_pastediag;
 	QMenu *m_treemenu;
 	QTreeWidgetItem *m_menuitem;
 	QTreeWidgetItem *m_copyitem;
+	unsigned int m_copyact;
 
 	QAction *m_acts[ACTION_END];
 	unsigned int m_curact;
 
 	void make_toolbar(QLayout *);
+
+	void refreshItem(QTreeWidgetItem *item);
+	void paste(QTreeWidgetItem *source, QTreeWidgetItem *dest, unsigned int copyaction);
 
 public slots:
 	void expanded(QTreeWidgetItem *item);
