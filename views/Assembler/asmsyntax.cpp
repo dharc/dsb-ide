@@ -35,24 +35,41 @@ either expressed or implied, of the FreeBSD Project.
 #include "asmsyntax.h"
 
 static const char *keywords[] = {
-		"LOAD",
-		"load",
-		"READ",
-		"read",
-		"JUMP",
-		"jump",
-		"RET",
-		"ret",
-		"JEQ",
-		"jeq",
-		"JNEQ",
-		"jneq"
-		"WRITE",
-		"write",
-		"COPY",
-		"copy",
-		"data",
+		"add",
+		"sub",
+		"div",
+		"mul",
+		"shl",
+		"shr",
+		"and",
+		"or",
+		"xor",
+		"neg",
 		"inc",
+		"dec",
+		"clr",
+		"int",
+		"flt",
+		"cpy",
+		"ret",
+		"jmp",
+		"jeq",
+		"jne",
+		"jle",
+		"jge",
+		"jlt",
+		"jgt",
+		"get",
+		"def",
+		"new",
+		"del",
+		"path",
+		"pathd",
+		"jisa",
+		"jisnt",
+		"sclone",
+		"dclone",
+		"const",
 		0
 };
 
@@ -75,7 +92,7 @@ Syntax::Syntax(QTextDocument *textEdit, QListWidget *kw)
 	font_number.setForeground(QColor("blue"));
 	font_char.setForeground(QColor(255,25,241));
 	font_op.setForeground(QColor("black"));
-	font_reg.setForeground(QColor("red"));
+	font_reg.setForeground(QColor("darkred"));
 }
 
 Syntax::~Syntax()
@@ -128,11 +145,10 @@ void Syntax::highlightBlock ( const QString & text )
 					setFormat(beg,pos-beg,font_number);
 					break;
 
-		case '%':	beg = pos;
+		case '$':	beg = pos;
 					pos++;
-					if (pos == text.length()) break;
-					pos++;
-					setFormat(beg, pos-beg, font_reg);
+					while (text2[pos] != 0 && text2[pos] != ' ' && text2[pos] != '\n' && text2[pos] != '\t' && text2[pos] != '+' && text2[pos] != '-') pos++;
+					setFormat(beg,pos-beg,font_reg);
 					break;
 
 		case '#':	beg = pos;

@@ -375,7 +375,7 @@ void Assembler::step_debug()
 		//Update register table.
 		for (int i=0; i<16; i++)
 		{
-			dsb_nid_toStr(&m_ctx.reg[i],buf,100);
+			dsb_nid_toStr(&m_ctx.vars[i],buf,100);
 			item = new QTableWidgetItem(buf);
 			m_regs->setItem(i,0,item);
 		}
@@ -442,7 +442,7 @@ void Assembler::start()
 	//Update register table.
 	for (int i=0; i<16; i++)
 	{
-		dsb_nid_toStr(&m_ctx.reg[i],buf,100);
+		dsb_nid_toStr(&m_ctx.vars[i],buf,100);
 		item = new QTableWidgetItem(buf);
 		m_regs->setItem(i,0,item);
 	}
