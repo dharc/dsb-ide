@@ -291,7 +291,7 @@ void Assembler::toolclick(QAction *a)
 	else if (a->text() == "Save Object")
 	{
 		//m_saveobj->show();
-		saveObject(m_def,true);
+		saveObject(m_def,false);
 		dsb_define(&m_obj,&m_key,&m_def,2);
 	}
 }
@@ -302,28 +302,38 @@ void Assembler::start_debug()
 	int line=0;
 	int lip;
 
-	int ip = 0;
-	struct VMLabel *labels = new VMLabel[MAX_LABELS];
+	struct AsmContext ctx;
 	const char *source = m_asm->toPlainText().toAscii().constData();
+	const char *oldsource = source;
 
-	dsb_assemble_labels(labels,source);
+	ctx.ip = 0;
+	ctx.labels = new VMLabel[MAX_LABELS];
+	ctx.output = m_ctx.code;
+	ctx.line = 1;
+
+	dsb_assemble_labels(ctx.labels,source);
 
 	//For every line
 	while(1)
 	{
-		lip = ip;
-		dsb_assemble_line(labels,source,m_ctx.code,&ip);
+		lip = ctx.ip;
+		dsb_assemble_line(&ctx,source);
 		//Store which line corresponds to each instructions.
 		m_ipline[lip] = line++;
-		lip = ip;
+		lip = ctx.ip;
 		//Move to next line if there is one.
 		source = strchr(source,'\n');
 		if (source == 0) break;
 		source++;
+		ctx.line++;
 	}
 
-	m_ctx.codesize = ip;
-	m_mem->setRowCount(ip);
+	//Now do a real compile with valid labels.
+	source = oldsource;
+	dsb_assemble_compile(&ctx, source);
+
+	m_ctx.codesize = ctx.ip;
+	m_mem->setRowCount(ctx.ip);
 
 	//Update memory table
 	char buf[100];
@@ -340,32 +350,45 @@ void Assembler::start_debug()
 	m_regs->setRowCount(16);
 	for (int i=0; i<MAX_LABELS; i++)
 	{
-		if (labels[i].lip != -1 && labels[i].mode == 1)
+		if (ctx.labels[i].lip != -1 && ctx.labels[i].mode == 1)
 		{
+			item = new QTableWidgetItem(ctx.labels[i].label);
+			m_regs->setItem(labcount,0,item);
 			labcount++;
-			item = new QTableWidgetItem(labels[i].label);
-			m_regs->setItem(i,0,item);
 		}
 	}
 	m_regs->setRowCount(labcount);
+
+	m_ctx.vars[0] = m_obj;
+	m_ctx.vars[1] = m_key;
+	m_ctx.vars[2] = m_def;
+	//Update built-in variable table.
+	for (int i=0; i<3; i++)
+	{
+		dsb_nid_toStr(&m_ctx.vars[i],buf,100);
+		item = new QTableWidgetItem(buf);
+		m_regs->setItem(i,1,item);
+	}
 
 	//Update label names
 	labcount = 0;
 	m_labs->setRowCount(16);
 	for (int i=0; i<MAX_LABELS; i++)
 	{
-		if (labels[i].lip != -1 && labels[i].mode == 0)
+		if (ctx.labels[i].lip != -1 && ctx.labels[i].mode == 0)
 		{
+			item = new QTableWidgetItem(ctx.labels[i].label);
+			m_labs->setItem(labcount,0,item);
+			item = new QTableWidgetItem(QString().setNum(ctx.labels[i].lip));
+			m_labs->setItem(labcount,1,item);
 			labcount++;
-			item = new QTableWidgetItem(labels[i].label);
-			m_labs->setItem(i,0,item);
-			item = new QTableWidgetItem(QString().setNum(labels[i].lip));
-			m_labs->setItem(i,1,item);
 		}
 	}
 	m_labs->setRowCount(labcount);
 
-	delete [] labels;
+	delete [] ctx.labels;
+
+	m_mem->setCurrentCell(0,0);
 
 	if (m_running == false)
 	{
@@ -427,6 +450,8 @@ void Assembler::step_debug()
 		highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ipline[m_ctx.ip]));
 		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
 		highlight.format.setBackground( QColor(255,184,107) );
+
+		m_mem->setCurrentCell(m_ctx.ip,0);
 
 		QList<QTextEdit::ExtraSelection> extras;
 		extras << highlight;
