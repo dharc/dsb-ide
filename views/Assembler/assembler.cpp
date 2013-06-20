@@ -148,25 +148,38 @@ Assembler::Assembler()
 	m_tabs = new QTabWidget();
 
 	m_regs = new QTableWidget();
-	m_regs->setColumnCount(1);
+	m_regs->setColumnCount(2);
+	m_regs->setColumnWidth(1,200);
 	m_regs->setRowCount(16);
 	QStringList headers;
-	headers.append("Registers");
+	headers.append("Name");
+	headers.append("Value");
 	m_regs->setHorizontalHeaderLabels(headers);
-	m_tabs->addTab(m_regs, "Registers");
+	m_tabs->addTab(m_regs, "Variables");
+
+	m_labs = new QTableWidget();
+	m_labs->setColumnCount(2);
+	m_labs->setColumnWidth(1,200);
+	m_labs->setRowCount(16);
+	//QStringList headers;
+	headers.clear();
+	headers.append("Name");
+	headers.append("Location");
+	m_labs->setHorizontalHeaderLabels(headers);
+	m_tabs->addTab(m_labs, "Labels");
 
 	m_mem = new QTableWidget();
 	m_mem->setColumnCount(1);
 	m_mem->setRowCount(16);
 	headers.clear();
-	headers.append("Memory");
+	headers.append("Code");
 	m_mem->setHorizontalHeaderLabels(headers);
-	m_tabs->addTab(m_mem, "Memory");
+	m_tabs->addTab(m_mem, "Code");
 
 	split->addWidget(m_tabs);
 	QList<int> sizes;
-	sizes.append(200);
-	sizes.append(20);
+	sizes.append(2000);
+	sizes.append(600);
 	split->setSizes(sizes);
 
 	m_result = new QLabel("Result = null");
@@ -322,6 +335,36 @@ void Assembler::start_debug()
 		m_mem->setItem(i,0,item);
 	}
 
+	//Update variable names
+	int labcount = 0;
+	m_regs->setRowCount(16);
+	for (int i=0; i<MAX_LABELS; i++)
+	{
+		if (labels[i].lip != -1 && labels[i].mode == 1)
+		{
+			labcount++;
+			item = new QTableWidgetItem(labels[i].label);
+			m_regs->setItem(i,0,item);
+		}
+	}
+	m_regs->setRowCount(labcount);
+
+	//Update label names
+	labcount = 0;
+	m_labs->setRowCount(16);
+	for (int i=0; i<MAX_LABELS; i++)
+	{
+		if (labels[i].lip != -1 && labels[i].mode == 0)
+		{
+			labcount++;
+			item = new QTableWidgetItem(labels[i].label);
+			m_labs->setItem(i,0,item);
+			item = new QTableWidgetItem(QString().setNum(labels[i].lip));
+			m_labs->setItem(i,1,item);
+		}
+	}
+	m_labs->setRowCount(labcount);
+
 	delete [] labels;
 
 	if (m_running == false)
@@ -372,20 +415,12 @@ void Assembler::step_debug()
 	else
 	{
 		char buf[100];
-		//Update register table.
+		//Update variable table.
 		for (int i=0; i<16; i++)
 		{
 			dsb_nid_toStr(&m_ctx.vars[i],buf,100);
 			item = new QTableWidgetItem(buf);
-			m_regs->setItem(i,0,item);
-		}
-
-		//Update memory table
-		for (int i=0; i<m_ctx.codesize; i++)
-		{
-			dsb_nid_toStr(&m_ctx.code[i],buf,100);
-			item = new QTableWidgetItem(buf);
-			m_mem->setItem(i,0,item);
+			m_regs->setItem(i,1,item);
 		}
 
 		QTextEdit::ExtraSelection highlight;

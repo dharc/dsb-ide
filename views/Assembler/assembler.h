@@ -93,6 +93,7 @@ private:
 	QTextEdit *m_asm;
 	QTableWidget *m_regs;
 	QTableWidget *m_mem;
+	QTableWidget *m_labs;
 	QLabel *m_result;
 	QAction *m_play;
 	QAction *m_debug;
