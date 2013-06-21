@@ -157,6 +157,12 @@ void DSBIde::make_toolbar()
 	connect(m_act_showtree,SIGNAL(toggled(bool)),this,SLOT(showtreeToggle(bool)));
 }
 
+ErrorLogger *DSBIde::errorLogger()
+{
+	m_tabsys->setCurrentWidget(m_errlogger);
+	return m_errlogger;
+}
+
 void DSBIde::showtreeToggle(bool val)
 {
 	if (val)

@@ -57,7 +57,7 @@ public:
 
 	void connected();
 	MessageLogger *messageLogger() { return m_msglogger; };
-	ErrorLogger *errorLogger() { return m_errlogger; };
+	ErrorLogger *errorLogger();
 	TreeView *tree() { return m_treeview; };
 	void showSplash();
 	void hideSplash();

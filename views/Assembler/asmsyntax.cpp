@@ -61,6 +61,7 @@ static const char *keywords[] = {
 		"jgt",
 		"get",
 		"def",
+		"dep",
 		"new",
 		"del",
 		"path",
@@ -151,7 +152,7 @@ void Syntax::highlightBlock ( const QString & text )
 					setFormat(beg,pos-beg,font_reg);
 					break;
 
-		case '#':	beg = pos;
+		case ';':	beg = pos;
 					pos++;
 					while (text2[pos] != 0 && text2[pos] != '\n') pos++;
 					setFormat(beg,pos-beg,font_comment);

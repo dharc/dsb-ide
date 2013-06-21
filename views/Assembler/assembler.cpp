@@ -300,27 +300,48 @@ void Assembler::start_debug()
 {
 	m_ctx.timeout = 1;
 	int line=0;
+	bool error = false;
 	int lip;
 
 	struct AsmContext ctx;
 	const char *source = m_asm->toPlainText().toAscii().constData();
 	const char *oldsource = source;
 
+	//Initialise first assembly context
 	ctx.ip = 0;
 	ctx.labels = new VMLabel[MAX_LABELS];
 	ctx.output = m_ctx.code;
 	ctx.line = 1;
+	ctx.error = 0;
 
+	//Insert default labels.
 	dsb_assemble_labels(ctx.labels,source);
 
 	//For every line
 	while(1)
 	{
 		lip = ctx.ip;
+		//Assemble the line.
 		dsb_assemble_line(&ctx,source);
 		//Store which line corresponds to each instructions.
 		m_ipline[lip] = line++;
 		lip = ctx.ip;
+
+		//Oops, highlight line as error.
+		if (ctx.error == 1)
+		{
+			error = true;
+			ctx.error = 0;
+			QTextEdit::ExtraSelection highlight;
+			highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(ctx.line-1));
+			highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+			highlight.format.setBackground( QColor(251,226,226) );
+			QList<QTextEdit::ExtraSelection> extras;
+			extras << highlight;
+			m_asm->setExtraSelections( extras );
+		}
+
+
 		//Move to next line if there is one.
 		source = strchr(source,'\n');
 		if (source == 0) break;
@@ -328,9 +349,13 @@ void Assembler::start_debug()
 		ctx.line++;
 	}
 
-	//Now do a real compile with valid labels.
-	source = oldsource;
-	dsb_assemble_compile(&ctx, source);
+	//If error, don't bother to patch compile
+	if (error == false)
+	{
+		//Now do a real compile with valid labels.
+		source = oldsource;
+		dsb_assemble_compile(&ctx, source);
+	}
 
 	m_ctx.codesize = ctx.ip;
 	m_mem->setRowCount(ctx.ip);
@@ -359,6 +384,7 @@ void Assembler::start_debug()
 	}
 	m_regs->setRowCount(labcount);
 
+	//Initialise default variables for the VM
 	m_ctx.vars[0] = m_obj;
 	m_ctx.vars[1] = m_key;
 	m_ctx.vars[2] = m_def;
@@ -390,6 +416,8 @@ void Assembler::start_debug()
 
 	m_mem->setCurrentCell(0,0);
 
+	if (error) return;
+
 	if (m_running == false)
 	{
 		m_ctx.ip = 0;
@@ -400,7 +428,7 @@ void Assembler::start_debug()
 	QTextEdit::ExtraSelection highlight;
 	highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ipline[0]));
 	highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
-	highlight.format.setBackground( QColor(255,184,107) );
+	highlight.format.setBackground( QColor(226,234,251) );
 
 	QList<QTextEdit::ExtraSelection> extras;
 	extras << highlight;
@@ -449,7 +477,7 @@ void Assembler::step_debug()
 		QTextEdit::ExtraSelection highlight;
 		highlight.cursor = QTextCursor(m_asm->document()->findBlockByLineNumber(m_ipline[m_ctx.ip]));
 		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
-		highlight.format.setBackground( QColor(255,184,107) );
+		highlight.format.setBackground( QColor(226,234,251) );
 
 		m_mem->setCurrentCell(m_ctx.ip,0);
 
