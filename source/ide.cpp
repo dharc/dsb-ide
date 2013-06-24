@@ -140,7 +140,7 @@ void DSBIde::make_menu()
 void DSBIde::make_toolbar()
 {
 	m_bar = new QToolBar();
-	m_bar_connect = m_bar->addAction(QIcon(":/icons/dharc-16.png"),"DHARC");
+	m_bar_connect = m_bar->addAction(QIcon(":/icons/dharc-24.png"),"DHARC");
 	m_bar->addSeparator();
 	m_bar_connect = m_bar->addAction(QIcon(":/icons/connect.png"),"Connect");
 	m_bar->addSeparator();

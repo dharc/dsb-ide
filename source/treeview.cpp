@@ -307,6 +307,7 @@ TreeView::TreeView()
  : QWidget()
 {
 	QVBoxLayout *mainlayout = new QVBoxLayout();
+	mainlayout->setContentsMargins(0,0,0,0);
 	setLayout(mainlayout);
 
 	make_toolbar(mainlayout);
@@ -356,16 +357,20 @@ void TreeView::make_toolbar(QLayout *l)
 {
 	m_bar = new QToolBar();
 	//m_acts[ACTION_NONE] = m_bar->addAction(QIcon(":/icons/cursor.png"),"None");
-	m_acts[ACTION_ADD] = m_bar->addAction(QIcon(":/icons/chart_organisation_add.png"),"Add");
-	m_acts[ACTION_DELETE] = m_bar->addAction(QIcon(":/icons/chart_organisation_delete.png"),"Delete");
-	m_acts[ACTION_EDIT] = m_bar->addAction(QIcon(":/icons/pencil.png"),"Edit");
+	m_acts[ACTION_ADD] = m_bar->addAction(QIcon(":/icons/blob-harc-plus-24.png"),"Add");
+	m_acts[ACTION_DELETE] = m_bar->addAction(QIcon(":/icons/blob-harc-minus-24.png"),"Delete");
+	m_acts[ACTION_EDIT] = m_bar->addAction(QIcon(":/icons/blob-harc-pencil-24.png"),"Edit");
 	m_acts[ACTION_EDITDEF] = m_bar->addAction(QIcon(":/icons/script_edit.png"),"Edit Definition");
 	m_acts[ACTION_VIEW] = m_bar->addAction(QIcon(":/icons/eye.png"),"View");
 	m_acts[ACTION_CLONE] = m_bar->addAction(QIcon(":/icons/page_copy.png"),"Clone");
-	m_acts[ACTION_MOVE] = m_bar->addAction(QIcon(":/icons/cut.png"),"Move");
+	//m_acts[ACTION_MOVE] = m_bar->addAction(QIcon(":/icons/cut.png"),"Move");
+	m_acts[ACTION_MOVE] = 0;
 	m_acts[ACTION_PASTE] = m_bar->addAction(QIcon(":/icons/page_paste.png"),"Paste");
-	m_acts[ACTION_LINK] = m_bar->addAction(QIcon(":/icons/link.png"),"Connect");
+	//m_acts[ACTION_LINK] = m_bar->addAction(QIcon(":/icons/link.png"),"Connect");
+	m_acts[ACTION_LINK] = 0;
+	m_bar->addSeparator();
 	m_acts[ACTION_HELP] = m_bar->addAction(QIcon(":/icons/help.png"),"Help");
+	m_bar->addSeparator();
 	m_acts[ACTION_HOME] = m_bar->addAction(QIcon(":/icons/house.png"),"Add Root");
 
 	QMenu *menu;
@@ -506,7 +511,7 @@ void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *pre
 			m_acts[ACTION_EDIT]->setEnabled(false);
 			m_acts[ACTION_EDITDEF]->setEnabled(false);
 			m_acts[ACTION_VIEW]->setEnabled(false);
-			m_acts[ACTION_MOVE]->setEnabled(false);
+			//m_acts[ACTION_MOVE]->setEnabled(false);
 		}
 		else
 		{
@@ -516,7 +521,7 @@ void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *pre
 			int eval;
 
 			m_acts[ACTION_VIEW]->setEnabled(true);
-			m_acts[ACTION_MOVE]->setEnabled(true);
+			//m_acts[ACTION_MOVE]->setEnabled(true);
 
 			dsb_getdef(&obj,&key,&def,&eval);
 
@@ -530,7 +535,7 @@ void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *pre
 			{
 				m_acts[ACTION_EDIT]->setEnabled(true);
 				m_acts[ACTION_EDITDEF]->setEnabled(true);
-				m_acts[ACTION_EDITDEF]->setIcon(QIcon(":/icons/script_add.png"));
+				m_acts[ACTION_EDITDEF]->setIcon(QIcon(":/icons/blob-harc-script.png"));
 			}
 
 			m_acts[ACTION_HOME]->setEnabled(true);
@@ -540,7 +545,10 @@ void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *pre
 	{
 		for (unsigned int i=1; i<ACTION_END; i++)
 		{
-			m_acts[i]->setEnabled(false);
+			if (m_acts[i] != 0)
+			{
+				m_acts[i]->setEnabled(false);
+			}
 		}
 	}
 }
