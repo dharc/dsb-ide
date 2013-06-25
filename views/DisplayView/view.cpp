@@ -32,14 +32,14 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#include <dsb/module.h>
-#include <dsb/nid.h>
+#include <dsb/core/module.h>
+#include <dsb/core/nid.h>
 #include "dsb/ide/view.h"
 #include <dsb/wrap.h>
-#include <dsb/string.h>
-#include <dsb/pattern_types.h>
-#include <dsb/pattern.h>
-#include <dsb/iterator.h>
+#include <dsb/patterns/string.h>
+#include <dsb/patterns/pattern_types.h>
+#include <dsb/patterns/pattern.h>
+#include <dsb/algorithms/iterator.h>
 #include <qt4/QtGui/QPainter>
 
 #include <cstdio>

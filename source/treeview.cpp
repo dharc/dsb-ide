@@ -35,14 +35,14 @@ either expressed or implied, of the FreeBSD Project.
 #include "treeview.h"
 #include "dsb/ide/ide.h"
 
-#include <dsb/nid.h>
-#include <dsb/iterator.h>
+#include <dsb/core/nid.h>
+#include <dsb/algorithms/iterator.h>
 #include <dsb/wrap.h>
-#include <dsb/pattern.h>
-#include <dsb/pattern_types.h>
-#include <dsb/vm.h>
+#include <dsb/patterns/pattern.h>
+#include <dsb/patterns/pattern_types.h>
+#include <dsb/core/vm.h>
 #include <dsb/globals.h>
-#include <dsb/clone.h>
+#include <dsb/algorithms/clone.h>
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -430,7 +430,7 @@ void TreeView::toolclick(QAction *a)
 		if (dsb_nid_eq(&def,&Null) == 1)
 		{
 			NID_t vmop;
-			dsb_nid(NID_VMOP,VM_RET(0),&vmop);
+			dsb_nid(NID_TYPE_VMOP,VM_RET(0),&vmop);
 			dsb_new(&PRoot,&def);
 			dsb_setnni(&def,&Size,1);
 			dsb_setnin(&def,0,&vmop);
@@ -568,7 +568,7 @@ void TreeView::menuclick(QAction *a)
 		if (dsb_nid_eq(&def,&Null) == 1)
 		{
 			NID_t vmop;
-			dsb_nid(NID_VMOP,VM_RET(0),&vmop);
+			dsb_nid(NID_TYPE_VMOP,VM_RET(0),&vmop);
 			dsb_new(&PRoot,&def);
 			dsb_setnni(&def,&Size,1);
 			dsb_setnin(&def,0,&vmop);

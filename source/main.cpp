@@ -39,11 +39,12 @@ either expressed or implied, of the FreeBSD Project.
 #include "treeview.h"
 #include "errlog.h"
 #include "dsb/ide/ide.h"
-#include "dsb/event.h"
+#include "dsb/core/event.h"
 #include "dsb/wrap.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
-#include "dsb/nid.h"
+#include "dsb/core/nid.h"
+#include "dsb/core/agent.h"
 #include "dsb/names.h"
 #include "dsb/globals.h"
 #include "dsb/common.h"
@@ -137,6 +138,17 @@ int net_cb_debugevent(void *sock, void *data)
 
 int net_cb_event(void *sock, void *data)
 {
+	Event_t evt;
+	dsb_event_unpack((const char*)data,&evt);
+
+	if (evt.d1.header == NID_AGENT)
+	{
+		if (dsb_nid_isLocal(&evt.d1) == 1)
+		{
+			dsb_agent_trigger((unsigned int)evt.d1.ll);
+		}
+	}
+
 	ide->messageLogger()->addMessage(DSBNET_SENDEVENT,data);
 	return 0;
 }

@@ -40,7 +40,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QVBoxLayout>
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
-#include "dsb/string.h"
+#include "dsb/patterns/string.h"
 #include "dsb/ide/ide.h"
 
 #include <iostream>

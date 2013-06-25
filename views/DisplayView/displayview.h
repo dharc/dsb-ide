@@ -36,7 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #define DISPLAYVIEW_H_
 
 #include "dsb/ide/view.h"
-#include <dsb/nid.h>
+#include <dsb/core/nid.h>
 
 class DisplayView : public DSBView
 {

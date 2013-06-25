@@ -38,7 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 /** @file view.h */
 
 #include <qt4/QtGui/QMainWindow>
-#include <dsb/nid.h>
+#include <dsb/core/nid.h>
 
 #define DSBVIEW(A) static const char *type() { return #A; } \
 	static A *create() { return new A(); }

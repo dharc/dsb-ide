@@ -33,8 +33,8 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "msggen.h"
-#include "dsb/event.h"
-#include "dsb/nid.h"
+#include "dsb/core/event.h"
+#include "dsb/core/nid.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include <qt4/QtGui/QComboBox>
@@ -250,7 +250,6 @@ void MessageGenerator::send_sendevent()
 		e->res = &dummy;
 		break;
 	case EVENT_DEFINE:
-		e->eval = m_table->item(3,1)->text().toUInt();
 		dsb_nid_fromStr(m_table->item(4,1)->text().toAscii().constData(), &e->def);
 		break;
 	case EVENT_NOTIFY:

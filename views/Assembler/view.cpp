@@ -33,9 +33,9 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "dsb/ide/view.h"
-#include "dsb/module.h"
-#include "dsb/nid.h"
-#include "dsb/pattern_types.h"
+#include "dsb/core/module.h"
+#include "dsb/core/nid.h"
+#include "dsb/patterns/pattern_types.h"
 #include "assembler.h"
 
 static struct Module asmmod;

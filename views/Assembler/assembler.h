@@ -35,8 +35,8 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef IDEASSEMBLER_H_
 #define IDEASSEMBLER_H_
 
-#include "dsb/vm.h"
-#include "dsb/nid.h"
+#include "dsb/core/vm.h"
+#include "dsb/core/nid.h"
 #include "dsb/ide/view.h"
 
 class QAction;

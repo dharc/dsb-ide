@@ -35,15 +35,15 @@ either expressed or implied, of the FreeBSD Project.
 #include "asmsyntax.h"
 #include "assembler.h"
 #include "dsb/assembler.h"
-#include "dsb/vm.h"
-#include "dsb/nid.h"
-#include "dsb/array.h"
+#include "dsb/core/vm.h"
+#include "dsb/core/nid.h"
+#include "dsb/patterns/array.h"
 #include "dsb/errors.h"
 #include "dsb/wrap.h"
 #include "dsb/globals.h"
-#include "dsb/string.h"
+#include "dsb/patterns/string.h"
 #include "dsb/assembler.h"
-#include "dsb/array.h"
+#include "dsb/patterns/array.h"
 #include "dsb/ide/ide.h"
 #include <qt4/QtGui/QHBoxLayout>
 #include <qt4/QtGui/QVBoxLayout>
@@ -441,7 +441,7 @@ void Assembler::step_debug()
 	QTableWidgetItem *item;
 	m_ctx.timeout = 1;
 
-	ret = dsb_vm_interpret_ctx(&m_ctx);
+	ret = dsb_vm_interpret(&m_ctx);
 
 	if (ret == -1) {
 		m_play->setIcon(QIcon(":/icons/control_play_blue.png"));
@@ -521,7 +521,7 @@ void Assembler::start()
 	m_ctx.timeout = 10000;
 
 	m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
-	dsb_vm_interpret_ctx(&m_ctx);
+	dsb_vm_interpret(&m_ctx);
 
 	char buf[100];
 	dsb_nid_toStr(m_ctx.result, buf, 100);

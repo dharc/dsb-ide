@@ -38,10 +38,10 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/ide/ide.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
-#include "dsb/nid.h"
+#include "dsb/core/nid.h"
 #include "dsb/errors.h"
 #include "dsb/names.h"
-#include "dsb/iterator.h"
+#include "dsb/algorithms/iterator.h"
 #include "dsb/globals.h"
 #include <qt4/QtGui/QTreeWidget>
 #include <qt4/QtGui/QHBoxLayout>

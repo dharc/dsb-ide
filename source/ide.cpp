@@ -39,7 +39,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "connectdiag.h"
 #include "dsb/ide/view.h"
 #include <dsb/globals.h>
-#include <dsb/pattern.h>
+#include <dsb/patterns/pattern.h>
 #include <dsb/net.h>
 #include <dsb/net_protocol.h>
 #include <qt4/QtGui/QToolBar>
