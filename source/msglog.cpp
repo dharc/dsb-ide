@@ -132,7 +132,6 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		switch(evt.type)
 		{
 		case EVENT_DEFINE:
-			item2 = new QTreeWidgetItem(item, QStringList(QString("Evaluator")) << QString("%1").arg(evt.eval));
 			dsb_nid_toStr(&(evt.def),buf,100);
 			item2 = new QTreeWidgetItem(item, QStringList(QString("Definition")) << QString(buf));
 			break;
@@ -168,7 +167,6 @@ void MessageLogger::addMessage(unsigned short type, void *data)
 		switch(evt.type)
 		{
 		case EVENT_DEFINE:
-			item2 = new QTreeWidgetItem(item, QStringList(QString("Evaluator")) << QString("%1").arg(evt.eval));
 			dsb_nid_toStr(&(evt.def),buf,100);
 			item2 = new QTreeWidgetItem(item, QStringList(QString("Definition")) << QString(buf));
 			break;

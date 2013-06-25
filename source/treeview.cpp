@@ -419,8 +419,7 @@ void TreeView::toolclick(QAction *a)
 		NID_t def;
 		NID_t obj = curitem->parent()->data(1,Qt::UserRole).value<NID>();
 		NID_t key = curitem->data(0,Qt::UserRole).value<NID>();
-		int eval;
-		dsb_getdef(&obj,&key,&def,&eval);
+		dsb_getdef(&obj,&key,&def);
 
 		//If no definition then make one.
 		if (dsb_nid_eq(&def,&Null) == 1)
@@ -430,7 +429,7 @@ void TreeView::toolclick(QAction *a)
 			dsb_new(&PRoot,&def);
 			dsb_setnni(&def,&Size,1);
 			dsb_setnin(&def,0,&vmop);
-			dsb_define(&obj,&key,&def,2);
+			dsb_define(&obj,&key,&def);
 		}
 
 		ide->newView(obj,key,def);
@@ -513,12 +512,11 @@ void TreeView::currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *pre
 			NID_t obj = current->parent()->data(1,Qt::UserRole).value<NID>();
 			NID_t key = current->data(0,Qt::UserRole).value<NID>();
 			NID_t def;
-			int eval;
 
 			m_acts[ACTION_VIEW]->setEnabled(true);
 			m_acts[ACTION_MOVE]->setEnabled(true);
 
-			dsb_getdef(&obj,&key,&def,&eval);
+			dsb_getdef(&obj,&key,&def);
 
 			if (dsb_pattern_isA(&def,DSB_PATTERN_BYTECODE))
 			{
@@ -556,8 +554,7 @@ void TreeView::menuclick(QAction *a)
 		NID_t def;
 		NID_t obj = m_menuitem->parent()->data(1,Qt::UserRole).value<NID>();
 		NID_t key = m_menuitem->data(0,Qt::UserRole).value<NID>();
-		int eval;
-		dsb_getdef(&obj,&key,&def,&eval);
+		dsb_getdef(&obj,&key,&def);
 
 		//If no definition then make one.
 		if (dsb_nid_eq(&def,&Null) == 1)
@@ -568,7 +565,7 @@ void TreeView::menuclick(QAction *a)
 			dsb_setnni(&def,&Size,1);
 			dsb_setnin(&def,0,&vmop);
 
-			dsb_define(&obj,&key,&def,2);
+			dsb_define(&obj,&key,&def);
 		}
 
 		ide->newView(obj,key,def);
@@ -659,11 +656,10 @@ void TreeView::updateItemDetails(QTreeWidgetItem *item)
 	addHiddenChildren(item,value);
 
 	int type;
-	int eval;
 	bool definition = false;
 
 	type = dsb_pattern_what(&value);
-	dsb_getdef(&root,&key,&value,&eval);
+	dsb_getdef(&root,&key,&value);
 
 	if (dsb_pattern_isA(&value,DSB_PATTERN_BYTECODE))
 	{

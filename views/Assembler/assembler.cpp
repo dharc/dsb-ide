@@ -292,7 +292,7 @@ void Assembler::toolclick(QAction *a)
 	{
 		//m_saveobj->show();
 		saveObject(m_def,false);
-		dsb_define(&m_obj,&m_key,&m_def,2);
+		dsb_define(&m_obj,&m_key,&m_def);
 	}
 }
 
