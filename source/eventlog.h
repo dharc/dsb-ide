@@ -38,7 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <qt4/QtGui/QWidget>
 #include <qt4/QtGui/QTableWidget>
 #include <qt4/QtGui/QToolBar>
-#include <dsb/event.h>
+#include <dsb/core/event.h>
 
 class QAction;
 class EventGenerator;

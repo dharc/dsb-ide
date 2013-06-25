@@ -28,7 +28,8 @@
 		<file>icons/resultset_next.png</file>
 		<file>icons/control_stop_blue.png</file>
 		<file>icons/delete.png</file>
-		<file>icons/pencil.png</file>
+		<file>icons/blob-harc-pencil-24.png</file>
+		<file>icons/blob-harc-script.png</file>
 		<file>icons/tag_blue.png</file>
 		<file>icons/tag_red.png</file>
 		<file>icons/tag_green.png</file>
@@ -51,6 +52,9 @@
 		<file>icons/cut.png</file>
 		<file>icons/help.png</file>
 		<file>icons/dharc-16.png</file>
+		<file>icons/dharc-24.png</file>
+		<file>icons/blob-harc-plus-24.png</file>
+		<file>icons/blob-harc-minus-24.png</file>
 		<file>icons/application_double.png</file>
 		<file>icons/application_side_tree.png</file>
 		<file>icons/computer.png</file>
