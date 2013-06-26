@@ -35,8 +35,8 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef CONNECTDIAG_H_
 #define CONNECTDIAG_H_
 
-#include <qt4/QtGui/QWidget>
-#include <qt4/QtGui/QLineEdit>
+#include <QWidget>
+#include <QLineEdit>
 
 class QPushButton;
 class QLabel;

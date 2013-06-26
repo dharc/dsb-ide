@@ -33,9 +33,9 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "eventgen.h"
-#include <qt4/QtGui/QWidget>
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <iostream>
 #include <dsb/nid.h>
 #include <dsb/errors.h>

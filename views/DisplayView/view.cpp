@@ -40,7 +40,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/patterns/pattern_types.h>
 #include <dsb/patterns/pattern.h>
 #include <dsb/algorithms/iterator.h>
-#include <qt4/QtGui/QPainter>
+#include <QPainter>
 
 #include <cstdio>
 

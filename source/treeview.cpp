@@ -43,15 +43,15 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/core/vm.h>
 #include <dsb/globals.h>
 #include <dsb/algorithms/clone.h>
-#include <qt4/QtGui/QTreeWidget>
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QToolBar>
-#include <qt4/QtGui/QLineEdit>
-#include <qt4/QtGui/QPushButton>
-#include <qt4/QtGui/QAction>
-#include <qt4/QtGui/QMenu>
-#include <qt4/QtGui/QHeaderView>
+#include <QTreeWidget>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QToolBar>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QAction>
+#include <QMenu>
+#include <QHeaderView>
 
 #include <iostream>
 
@@ -106,7 +106,7 @@ void AddObject::addclicked()
 	NID_t value;
 
 	root = m_item->data(1,Qt::UserRole).value<NID>();
-	dsb_nid_fromStr(m_attr->text().toAscii().constData(),&key);
+	dsb_nid_fromStr(m_attr->text().toLatin1().constData(),&key);
 
 	if (m_value->text() == "new")
 	{
@@ -114,7 +114,7 @@ void AddObject::addclicked()
 	}
 	else
 	{
-		dsb_nid_fromStr(m_value->text().toAscii().constData(),&value);
+		dsb_nid_fromStr(m_value->text().toLatin1().constData(),&value);
 	}
 
 	dsb_set(&root,&key,&value);
@@ -186,7 +186,7 @@ void EditObject::editclicked()
 	}
 	else
 	{
-		dsb_nid_fromStr(m_value->text().toAscii().constData(),&value);
+		dsb_nid_fromStr(m_value->text().toLatin1().constData(),&value);
 	}
 
 	dsb_set(&root,&key,&value);
@@ -257,7 +257,7 @@ void PasteObject::pasteclicked()
 	//Get the relevant NIDs from the items.
 	dobj = m_dest->data(1,Qt::UserRole).value<NID>();
 	//key = m_src->data(0,Qt::UserRole).value<NID>();
-	dsb_nid_fromStr(m_value->text().toAscii().constData(),&key);
+	dsb_nid_fromStr(m_value->text().toLatin1().constData(),&key);
 	val = m_src->data(1,Qt::UserRole).value<NID>();
 
 	//Check for an existing key being overwritten.

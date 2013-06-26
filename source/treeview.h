@@ -35,8 +35,8 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef TREEVIEW_H_
 #define TREEVIEW_H_
 
-#include <qt4/QtGui/QWidget>
-#include <qt4/QtGui/QDialog>
+#include <QWidget>
+#include <QDialog>
 
 typedef struct NID NID_t;
 class QTreeWidget;

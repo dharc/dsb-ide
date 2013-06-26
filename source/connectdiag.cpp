@@ -33,11 +33,11 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "connectdiag.h"
-#include <qt4/QtGui/QLineEdit>
-#include <qt4/QtGui/QLabel>
-#include <qt4/QtGui/QPushButton>
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
+#include <QLineEdit>
+#include <QLabel>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
 #include "dsb/patterns/string.h"
@@ -109,7 +109,7 @@ ConnectDialog::~ConnectDialog()
 
 void ConnectDialog::connectclicked()
 {
-	hostsock = dsb_net_connect(m_host->text().toAscii().constData());
+	hostsock = dsb_net_connect(m_host->text().toLatin1().constData());
 	if (hostsock == 0)
 	{
 		m_message->setText("Could not connect to host!");

@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (dsbide)
-FIND_PACKAGE(Qt4 REQUIRED)
+FIND_PACKAGE(Qt5Widgets REQUIRED)
 
 # Need to include staged files and libs
 include_directories(${PROJECT_SOURCE_DIR}/source)
@@ -30,12 +30,14 @@ set(DSBIDERCCS data/icons.qrc data/splash.qrc)
 
 # configure_file( ${CMAKE_SOURCE_DIR}/common/include/dsb/config.h.in ${CMAKE_BINARY_DIR}/config.h )
 
-QT4_WRAP_CPP(DSBIDEHEADERSMOC ${DSBIDEHEADERS})
-QT4_ADD_RESOURCES(DSBIDERCCSRCS ${DSBIDERCCS})
+QT5_WRAP_CPP(DSBIDEHEADERSMOC ${DSBIDEHEADERS})
+QT5_ADD_RESOURCES(DSBIDERCCSRCS ${DSBIDERCCS})
 
-INCLUDE(${QT_USE_FILE})
-ADD_DEFINITIONS(${QT_DEFINITIONS})
+INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+ADD_DEFINITIONS(${Qt5Widgets_DEFINITIONS})
 
 add_executable(dsb-ide ${DSBIDESRC} ${DSBIDEHEADERSMOC} ${DSBIDERCCSRCS})
 target_link_libraries(dsb-ide dsbcommon ${QT_LIBRARIES})
+
+qt5_use_modules(dsb-ide Widgets)
 

@@ -42,15 +42,15 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/patterns/pattern.h>
 #include <dsb/net.h>
 #include <dsb/net_protocol.h>
-#include <qt4/QtGui/QToolBar>
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QAction>
-#include <qt4/QtGui/QSplitter>
-#include <qt4/QtGui/QSplashScreen>
-#include <qt4/QtCore/QCoreApplication>
-#include <qt4/QtGui/QMenuBar>
-#include <qt4/QtGui/QStatusBar>
+#include <QToolBar>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QAction>
+#include <QSplitter>
+#include <QSplashScreen>
+#include <QCoreApplication>
+#include <QMenuBar>
+#include <QStatusBar>
 
 #include <cstdio>
 

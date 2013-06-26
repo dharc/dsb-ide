@@ -36,7 +36,7 @@ either expressed or implied, of the FreeBSD Project.
 #define ERRLOG_H_
 
 
-#include <qt4/QtGui/QWidget>
+#include <QWidget>
 
 class QListWidget;
 class QLayout;

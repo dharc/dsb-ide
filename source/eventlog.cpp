@@ -40,10 +40,10 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/nid.h"
 #include "dsb/net_protocol.h"
 #include "dsb/errors.h"
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QAction>
-#include <qt4/QtCore/QTimer>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QAction>
+#include <QTimer>
 #include <iostream>
 #include <stdio.h>
 

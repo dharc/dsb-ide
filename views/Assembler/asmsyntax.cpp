@@ -107,7 +107,7 @@ void Syntax::highlightBlock ( const QString & text )
 	int beg = 0;
 	//bool istring;
 	unsigned int i;
-	const char *text2 = (const char*)text.toAscii();
+	const char *text2 = (const char*)text.toLatin1();
 	const char *kword;
 
 	//bool start = true;

@@ -37,12 +37,12 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/core/nid.h"
 #include "dsb/net.h"
 #include "dsb/net_protocol.h"
-#include <qt4/QtGui/QComboBox>
-#include <qt4/QtGui/QPushButton>
-#include <qt4/QtGui/QLabel>
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QTableWidget>
+#include <QComboBox>
+#include <QPushButton>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QTableWidget>
 
 extern "C"
 {
@@ -238,8 +238,8 @@ void MessageGenerator::send_sendevent()
 {
 	Event_t *e = dsb_event_allocate();
 	e->type = (EventType)m_table->item(0,1)->text().toInt();
-	dsb_nid_fromStr(m_table->item(1,1)->text().toAscii().constData(), &e->d1);
-	dsb_nid_fromStr(m_table->item(2,1)->text().toAscii().constData(), &e->d2);
+	dsb_nid_fromStr(m_table->item(1,1)->text().toLatin1().constData(), &e->d1);
+	dsb_nid_fromStr(m_table->item(2,1)->text().toLatin1().constData(), &e->d2);
 
 	switch(e->type)
 	{
@@ -250,13 +250,13 @@ void MessageGenerator::send_sendevent()
 		e->res = &dummy;
 		break;
 	case EVENT_DEFINE:
-		dsb_nid_fromStr(m_table->item(4,1)->text().toAscii().constData(), &e->def);
+		dsb_nid_fromStr(m_table->item(4,1)->text().toLatin1().constData(), &e->def);
 		break;
 	case EVENT_NOTIFY:
 		break;
 	case EVENT_DEP:
-		dsb_nid_fromStr(m_table->item(5,1)->text().toAscii().constData(), &e->dep1);
-		dsb_nid_fromStr(m_table->item(6,1)->text().toAscii().constData(), &e->dep2);
+		dsb_nid_fromStr(m_table->item(5,1)->text().toLatin1().constData(), &e->dep1);
+		dsb_nid_fromStr(m_table->item(6,1)->text().toLatin1().constData(), &e->dep2);
 		break;
 	default: break;
 	}

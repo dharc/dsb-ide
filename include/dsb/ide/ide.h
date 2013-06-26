@@ -35,7 +35,7 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef IDE_H_
 #define IDE_H_
 
-#include <qt4/QtGui/QMainWindow>
+#include <QMainWindow>
 
 class QToolBar;
 class TreeView;

@@ -45,19 +45,19 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/assembler.h"
 #include "dsb/patterns/array.h"
 #include "dsb/ide/ide.h"
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QAction>
-#include <qt4/QtGui/QToolBar>
-#include <qt4/QtGui/QTextEdit>
-#include <qt4/QtGui/QTableWidget>
-#include <qt4/QtGui/QSplitter>
-#include <qt4/QtGui/QLineEdit>
-#include <qt4/QtGui/QPushButton>
-#include <qt4/QtGui/QLabel>
-#include <qt4/QtGui/QFileDialog>
-#include <qt4/QtCore/QTextStream>
-#include <qt4/QtGui/QCheckBox>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QAction>
+#include <QToolBar>
+#include <QTextEdit>
+#include <QTableWidget>
+#include <QSplitter>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLabel>
+#include <QFileDialog>
+#include <QTextStream>
+#include <QCheckBox>
 #include <iostream>
 
 extern DSBIde *ide;
@@ -98,7 +98,7 @@ SaveObject::~SaveObject()
 void SaveObject::saveclicked()
 {
 	NID_t n;
-	if (dsb_nid_fromStr(m_obj->text().toAscii().constData(),&n) == 0)
+	if (dsb_nid_fromStr(m_obj->text().toLatin1().constData(),&n) == 0)
 	{
 		m_asm->saveObject(n,m_source->isChecked());
 		hide();
@@ -240,10 +240,10 @@ void Assembler::saveObject(const NID_t &n, bool incsrc)
 			dsb_new(&n,&str);
 		}
 
-		dsb_string_cton(&str,m_asm->toPlainText().toAscii().constData());
+		dsb_string_cton(&str,m_asm->toPlainText().toLatin1().constData());
 	}
 
-	m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
+	m_ctx.codesize = dsb_assemble_array(m_asm->toPlainText().toLatin1().constData(),m_ctx.code,200);
 	dsb_array_write(m_ctx.code,m_ctx.codesize,&n);
 }
 
@@ -304,7 +304,7 @@ void Assembler::start_debug()
 	int lip;
 
 	struct AsmContext ctx;
-	const char *source = m_asm->toPlainText().toAscii().constData();
+	const char *source = m_asm->toPlainText().toLatin1().constData();
 	const char *oldsource = source;
 
 	//Initialise first assembly context
@@ -520,7 +520,7 @@ void Assembler::start()
 	m_ctx.ip = 0;
 	m_ctx.timeout = 10000;
 
-	m_ctx.codesize = dsb_assemble(m_asm->toPlainText().toAscii().constData(),m_ctx.code,200);
+	m_ctx.codesize = dsb_assemble_array(m_asm->toPlainText().toLatin1().constData(),m_ctx.code,200);
 	dsb_vm_interpret(&m_ctx);
 
 	char buf[100];

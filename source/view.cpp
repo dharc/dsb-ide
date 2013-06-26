@@ -33,7 +33,7 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include "dsb/ide/view.h"
-#include <qt4/QtCore/QHash>
+#include <QHash>
 
 #include <cstdio>
 
@@ -76,5 +76,5 @@ DSBView *DSBView::createView(int pat)
 {
 	QString view = patterns.value(pat,"");
 
-	return createView(view.toAscii().constData());
+	return createView(view.toLatin1().constData());
 }

@@ -35,11 +35,11 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef EVENTGEN_H_
 #define EVENTGEN_H_
 
-#include <qt4/QtGui/QWidget>
-#include <qt4/QtGui/QLineEdit>
-#include <qt4/QtGui/QComboBox>
-#include <qt4/QtGui/QPushButton>
-#include <qt4/QtGui/QLabel>
+#include <QWidget>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QPushButton>
+#include <QLabel>
 #include <dsb/event.h>
 
 class EventGenerator : public QWidget

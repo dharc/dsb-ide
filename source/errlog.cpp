@@ -34,8 +34,8 @@ either expressed or implied, of the FreeBSD Project.
 
 #include <dsb/errors.h>
 #include "errlog.h"
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QListWidget>
+#include <QVBoxLayout>
+#include <QListWidget>
 
 ErrorLogger::ErrorLogger()
 {

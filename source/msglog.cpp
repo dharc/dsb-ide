@@ -43,13 +43,13 @@ either expressed or implied, of the FreeBSD Project.
 #include "dsb/names.h"
 #include "dsb/algorithms/iterator.h"
 #include "dsb/globals.h"
-#include <qt4/QtGui/QTreeWidget>
-#include <qt4/QtGui/QHBoxLayout>
-#include <qt4/QtGui/QVBoxLayout>
-#include <qt4/QtGui/QAction>
-#include <qt4/QtGui/QToolBar>
-#include <qt4/QtCore/QTimer>
-#include <qt4/QtGui/QHeaderView>
+#include <QTreeWidget>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QAction>
+#include <QToolBar>
+#include <QTimer>
+#include <QHeaderView>
 
 #include <iostream>
 

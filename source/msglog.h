@@ -35,7 +35,7 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef MSGLOG_H_
 #define MSGLOG_H_
 
-#include <qt4/QtGui/QWidget>
+#include <QWidget>
 
 class QTreeWidget;
 class QLayout;

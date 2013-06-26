@@ -35,7 +35,7 @@ either expressed or implied, of the FreeBSD Project.
 #ifndef MSGGEN_H_
 #define MSGGEN_H_
 
-#include <qt4/QtGui/QWidget>
+#include <QWidget>
 
 class QComboBox;
 class QTableWidget;
