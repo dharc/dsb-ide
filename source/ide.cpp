@@ -51,11 +51,73 @@ either expressed or implied, of the FreeBSD Project.
 #include <QCoreApplication>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QDockWidget>
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 #include <cstdio>
+#include <iostream>
 
 extern DSBIde *ide;
 extern void *hostsock;
+
+class MdiMain : public QMdiArea
+{
+public:
+	MdiMain() : QMdiArea() { setAcceptDrops(true); };
+	~MdiMain() {};
+
+protected:
+	void dragEnterEvent(QDragEnterEvent *event);
+	void dropEvent(QDropEvent *event);
+};
+
+void MdiMain::dragEnterEvent(QDragEnterEvent *event)
+{
+	QStringList lst;
+	lst = event->mimeData()->formats();
+
+	for (int i=0; i<lst.length(); i++)
+	{
+		std::cout << "Format: " << lst[i].toLatin1().constData() << "\n";
+	}
+
+	if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
+	{
+		event->acceptProposedAction();
+	}
+}
+
+Q_DECLARE_METATYPE(NID);
+
+void MdiMain::dropEvent(QDropEvent *event)
+{
+	QByteArray var = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
+	QDataStream stream(&var, QIODevice::ReadOnly);
+	NID_t t1;
+	NID_t t2;
+	NID_t v;
+
+	while (!stream.atEnd())
+	{
+		int row, col;
+		QMap<int, QVariant> roleDataMap;
+		stream >> row >> col >> roleDataMap;
+
+		if (col == 0)
+		{
+			t2 = roleDataMap.value(Qt::UserRole).value<NID>();
+		}
+		else if (col == 1)
+		{
+			v = roleDataMap.value(Qt::UserRole).value<NID>();
+		}
+	}
+
+	ide->newView(t1,t2,v);
+}
 
 DSBIde::DSBIde()
  : QMainWindow()
@@ -74,9 +136,9 @@ DSBIde::DSBIde()
 	m_treeview = new TreeView();
 	split->addWidget(m_treeview);
 
-	m_tabviews = new QTabWidget();
+	m_tabviews = new MdiMain();
 	m_tabviews->setTabsClosable(true);
-	connect(m_tabviews,SIGNAL(tabCloseRequested(int)),this,SLOT(closeView(int)));
+	//connect(m_tabviews,SIGNAL(tabCloseRequested(int)),this,SLOT(closeView(int)));
 	vsplit->addWidget(m_tabviews);
 	m_tabsys = new QTabWidget();
 	vsplit->addWidget(m_tabsys);
@@ -186,7 +248,7 @@ void DSBIde::toolclick(QAction *a)
 		statusBar()->showMessage("Disconnected");
 		dsb_net_disconnect(hostsock);
 		m_treeview->clear();
-		m_tabviews->clear();
+		//m_tabviews->clear();
 		m_bar_connect->setIcon(QIcon(":/icons/connect.png"));
 		m_bar_connect->setText("Connect");
 	}
@@ -194,9 +256,9 @@ void DSBIde::toolclick(QAction *a)
 
 void DSBIde::closeView(int index)
 {
-	QWidget *cur = m_tabviews->widget(index);
-	m_tabviews->removeTab(index);
-	delete cur;
+	//QWidget *cur = m_tabviews->widget(index);
+	//m_tabviews->removeTab(index);
+	//delete cur;
 }
 
 void DSBIde::viewTabChanged(int index)
@@ -226,8 +288,17 @@ void DSBIde::newView(const NID_t &d1, const NID_t &d2, const NID_t &nid)
 	if (nv != 0)
 	{
 		nv->addHARC(d1,d2,nid);
-		m_tabviews->addTab(nv,nv->title());
-		m_tabviews->setCurrentWidget(nv);
+
+		QMdiSubWindow *win = new QMdiSubWindow(this);
+		win->setWidget(nv);
+		win->setAttribute(Qt::WA_DeleteOnClose);
+		win->setMinimumSize(nv->minimumSize());
+
+		m_tabviews->addSubWindow(win);
+
+		win->show();
+		win->activateWindow();
+		//m_tabviews->setCurrentWidget(nv);
 	}
 }
 

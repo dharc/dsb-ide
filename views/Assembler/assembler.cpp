@@ -85,6 +85,7 @@ SaveObject::SaveObject(Assembler *a)
 	buttonlayout->addWidget(m_cancel);
 
 	setWindowTitle("Save Script to Object");
+	resize(600,400);
 
 	connect(m_save, SIGNAL(clicked()), this, SLOT(saveclicked()));
 	connect(m_cancel, SIGNAL(clicked()), this, SLOT(cancelclicked()));
@@ -179,7 +180,7 @@ Assembler::Assembler()
 	split->addWidget(m_tabs);
 	QList<int> sizes;
 	sizes.append(2000);
-	sizes.append(600);
+	sizes.append(800);
 	split->setSizes(sizes);
 
 	m_result = new QLabel("Result = null");
@@ -187,7 +188,7 @@ Assembler::Assembler()
 	mainlayout->addWidget(m_result);
 
 	setWindowTitle("DSB Assembler");
-	//resize(700,400);
+	setMinimumSize(750,380);
 	//show();
 
 	m_running = false;

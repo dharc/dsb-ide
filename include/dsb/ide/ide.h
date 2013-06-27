@@ -38,6 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 #include <QMainWindow>
 
 class QToolBar;
+class QMdiArea;
 class TreeView;
 class QTabWidget;
 class MessageLogger;
@@ -70,7 +71,7 @@ private:
 	QToolBar *m_bar;
 	QAction *m_bar_connect;
 	TreeView *m_treeview;
-	QTabWidget *m_tabviews;
+	QMdiArea *m_tabviews;
 	QTabWidget *m_tabsys;
 	MessageLogger *m_msglogger;
 	ErrorLogger *m_errlogger;

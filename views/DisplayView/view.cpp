@@ -51,6 +51,8 @@ DisplayView::DisplayView()
 {
 	m_height = 240;
 	m_width = 320;
+	setWindowTitle("Display");
+	setMinimumSize(m_width,m_height);
 }
 
 DisplayView::~DisplayView()
@@ -67,6 +69,8 @@ void DisplayView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
 
 	if (m_width == 0) m_width = 100;
 	if (m_height == 0) m_height = 100;
+
+	setMinimumSize(m_width,m_height);
 
 	repaint();
 }
@@ -105,8 +109,25 @@ void DisplayView::drawElement(QPainter &painter, const NID_t *ele)
 	{
 	case DSB_PATTERN_SHAPE_LINE:	drawLine(painter,ele); break;
 	case DSB_PATTERN_SHAPE_TEXT:	drawText(painter,ele); break;
+	case DSB_PATTERN_SHAPE_IMAGE:	drawImage(painter,ele); break;
 	default: break;
 	}
+}
+
+void DisplayView::drawImage(QPainter &painter, const NID_t *ele)
+{
+	int x;
+	int y;
+	char fname[200];
+	NID_t tmp;
+
+	dsb_getnzi(ele,"x",&x);
+	dsb_getnzi(ele,"y",&y);
+	dsb_getnzn(ele,"filename",&tmp);
+
+	dsb_string_ntoc(fname,200,&tmp);
+
+	painter.drawImage(x,y,QImage(fname));
 }
 
 void DisplayView::drawLine(QPainter &painter, const NID_t *ele)

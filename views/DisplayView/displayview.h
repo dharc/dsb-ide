@@ -57,6 +57,7 @@ public:
 	void drawElement(QPainter &painter, const NID_t *ele);
 	void drawLine(QPainter &painter, const NID_t *ele);
 	void drawText(QPainter &painter, const NID_t *ele);
+	void drawImage(QPainter &painter, const NID_t *ele);
 
 private:
 	int m_width;

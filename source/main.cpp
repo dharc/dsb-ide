@@ -33,7 +33,6 @@ either expressed or implied, of the FreeBSD Project.
  */
 
 #include <QApplication>
-#include "eventlog.h"
 #include "connectdiag.h"
 #include "msglog.h"
 #include "treeview.h"

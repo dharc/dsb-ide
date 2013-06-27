@@ -43,7 +43,8 @@ static QHash<int,QString> patterns;
 DSBView::DSBView()
 	: QMainWindow()
 {
-
+	setWindowIcon(QIcon(":/icons/dharc-16.png"));
+	show();
 }
 
 DSBView::~DSBView()

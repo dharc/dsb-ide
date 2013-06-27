@@ -52,10 +52,45 @@ either expressed or implied, of the FreeBSD Project.
 #include <QAction>
 #include <QMenu>
 #include <QHeaderView>
+#include <QDataStream>
 
 #include <iostream>
 
 Q_DECLARE_METATYPE(NID);
+
+QDataStream &operator<<(QDataStream &out, const NID &mynid)
+{
+	out << mynid.header;
+	if (mynid.header != 0)
+	{
+		out.writeRawData((const char *)mynid.mac,8);
+		out << mynid.n;
+	}
+	else
+	{
+		out << mynid.t;
+		out << mynid.ll;
+	}
+
+	return out;
+}
+
+QDataStream &operator>>(QDataStream &in, NID &mynid)
+{
+	in >> mynid.header;
+	if (mynid.header != 0)
+	{
+		in.readRawData((char *)mynid.mac,8);
+		in >> mynid.n;
+	}
+	else
+	{
+		in >> mynid.t;
+		in >> mynid.ll;
+	}
+
+	return in;
+}
 
 extern DSBIde *ide;
 
@@ -310,6 +345,8 @@ TreeView::TreeView()
 	mainlayout->setContentsMargins(0,0,0,0);
 	setLayout(mainlayout);
 
+	qRegisterMetaTypeStreamOperators<NID>("NID");
+
 	make_toolbar(mainlayout);
 
 	m_tree = new QTreeWidget();
@@ -427,7 +464,7 @@ void TreeView::toolclick(QAction *a)
 		dsb_getdef(&obj,&key,&def);
 
 		//If no definition then make one.
-		if (dsb_nid_eq(&def,&Null) == 1)
+		if (dsb_pattern_isA(&def,DSB_PATTERN_BYTECODE) == 0)
 		{
 			NID_t vmop;
 			dsb_nid(NID_TYPE_VMOP,VM_RET(0),&vmop);
