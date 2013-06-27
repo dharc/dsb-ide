@@ -35,6 +35,16 @@ either expressed or implied, of the FreeBSD Project.
 #include "asmsyntax.h"
 
 static const char *keywords[] = {
+		"call",
+		"callx",
+		"agent",
+		"path",
+		"pathd",
+		"jisa",
+		"jisnt",
+		"sclone",
+		"dclone",
+		"const",
 		"add",
 		"sub",
 		"div",
@@ -59,22 +69,12 @@ static const char *keywords[] = {
 		"jge",
 		"jlt",
 		"jgt",
-		"get",
 		"getd",
+		"get",
 		"def",
 		"dep",
 		"new",
 		"del",
-		"call",
-		"callx",
-		"agent",
-		"path",
-		"pathd",
-		"jisa",
-		"jisnt",
-		"sclone",
-		"dclone",
-		"const",
 		0
 };
 
@@ -83,8 +83,8 @@ Syntax::Syntax(QTextDocument *textEdit, QListWidget *kw)
 {
 	m_keylist = kw;
 
-	font_label.setFont(QFont("Courier New", 11, QFont::Bold));
-	font_comment.setFont(QFont("Courier New", 11));
+	font_label.setFont(QFont("Courier New", 10, QFont::Bold));
+	font_comment.setFont(QFont("Courier New", 10));
 	font_normal.setFont(font_comment.font());
 	font_number.setFont(font_normal.font());
 	font_char.setFont(font_number.font());
@@ -181,6 +181,10 @@ void Syntax::highlightBlock ( const QString & text )
 							break;
 						}
 						kword = keywords[++i];
+					}
+					if (kword == 0)
+					{
+						setFormat(beg,pos-beg, font_normal);
 					}
 					break;
 		}
