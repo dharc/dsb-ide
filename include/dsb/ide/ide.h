@@ -62,7 +62,7 @@ public:
 	TreeView *tree() { return m_treeview; };
 	void showSplash();
 	void hideSplash();
-	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid);
+	void newView(const NID_t &d1, const NID_t &d2, const NID_t &nid, int mode);
 
 private:
 	void make_toolbar();

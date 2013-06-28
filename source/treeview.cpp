@@ -474,7 +474,7 @@ void TreeView::toolclick(QAction *a)
 			dsb_define(&obj,&key,&def);
 		}
 
-		ide->newView(obj,key,def);
+		ide->newView(obj,key,def,1);
 	}
 	else if (act == ACTION_VIEW)
 	{
@@ -483,7 +483,7 @@ void TreeView::toolclick(QAction *a)
 		NID_t d1 = curitem->parent()->data(1,Qt::UserRole).value<NID>();
 		NID_t d2 = curitem->data(0,Qt::UserRole).value<NID>();
 		NID_t v = curitem->data(1,Qt::UserRole).value<NID>();
-		ide->newView(d1,d2,v);
+		ide->newView(d1,d2,v,0);
 	}
 	else if (act == ACTION_HOME)
 	{
@@ -613,7 +613,7 @@ void TreeView::menuclick(QAction *a)
 			dsb_define(&obj,&key,&def);
 		}
 
-		ide->newView(obj,key,def);
+		ide->newView(obj,key,def,1);
 	}
 }
 
@@ -692,7 +692,7 @@ void TreeView::updateItemDetails(QTreeWidgetItem *item)
 
 	//Update the items value.
 	dsb_get(&root,&key,&value);
-	dsb_nid_pretty(&value,buf,100);
+	dsb_nid_toStr(&value,buf,100);
 	item->setText(1,buf);
 	item->setData(1,Qt::UserRole,QVariant::fromValue(value));
 
@@ -723,6 +723,9 @@ void TreeView::updateItemDetails(QTreeWidgetItem *item)
 									item->setIcon(0,QIcon(":/icons/blob-int.png"));
 								}
 								item->setForeground(1,QBrush(QColor("blue")));
+								break;
+	case DSB_PATTERN_BYTECODE:
+								item->setIcon(0,QIcon(":/icons/dsb-script.png"));
 								break;
 	case DSB_PATTERN_BOOLEAN:	item->setIcon(0,QIcon(":/icons/blob-bool.png"));
 								{

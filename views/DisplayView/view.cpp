@@ -60,7 +60,7 @@ DisplayView::~DisplayView()
 
 }
 
-void DisplayView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
+void DisplayView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode)
 {
 	//dsb_get(&t1,&t2,&m_obj);
 	m_obj = h;

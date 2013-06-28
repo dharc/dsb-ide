@@ -208,7 +208,7 @@ void Assembler::clearHARCs()
 
 }
 
-void Assembler::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
+void Assembler::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode)
 {
 	char buffer[10000];
 	NID_t *array;
@@ -225,6 +225,7 @@ void Assembler::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
 	m_def = h;
 	m_obj = t1;
 	m_key = t2;
+	m_mode = mode;
 }
 
 void Assembler::saveObject(const NID_t &n, bool incsrc)
@@ -293,7 +294,15 @@ void Assembler::toolclick(QAction *a)
 	{
 		//m_saveobj->show();
 		saveObject(m_def,false);
-		dsb_define(&m_obj,&m_key,&m_def);
+
+		if (m_mode == 1)
+		{
+			dsb_define(&m_obj,&m_key,&m_def);
+		}
+		else
+		{
+			dsb_set(&m_obj,&m_key,&m_def);
+		}
 	}
 }
 

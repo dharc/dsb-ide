@@ -47,7 +47,7 @@ public:
 	ObjectView();
 	~ObjectView();
 
-	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h);
+	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode);
 	void clearHARCs();
 	const char *title() { return "Object"; }
 };

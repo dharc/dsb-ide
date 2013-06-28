@@ -54,7 +54,14 @@ public:
 	static const char *type() { return "DSBView"; }
 
 	virtual const char *title()=0;
-	virtual void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)=0;
+	/**
+	 *
+	 * @param t1
+	 * @param t2
+	 * @param h
+	 * @param mode 0 for value or 1 for definition.
+	 */
+	virtual void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode)=0;
 	virtual void clearHARCs()=0;
 
 	template <typename T>

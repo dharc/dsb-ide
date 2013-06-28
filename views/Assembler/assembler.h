@@ -83,7 +83,7 @@ public:
 
 	const char *title() { return "Assembler"; }
 	void clearHARCs();
-	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h);
+	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode);
 
 	//void setObject(const NID_t &obj);
 	void saveObject(const NID_t &obj, bool incsrc);
@@ -103,6 +103,7 @@ private:
 	NID_t m_def;
 	NID_t m_obj;
 	NID_t m_key;
+	int m_mode;
 
 	bool m_running;
 	struct VMContext m_ctx;

@@ -51,7 +51,7 @@ ObjectView::~ObjectView()
 
 }
 
-void ObjectView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h)
+void ObjectView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode)
 {
 
 }

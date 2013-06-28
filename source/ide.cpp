@@ -116,7 +116,7 @@ void MdiMain::dropEvent(QDropEvent *event)
 		}
 	}
 
-	ide->newView(t1,t2,v);
+	ide->newView(t1,t2,v,0);
 }
 
 DSBIde::DSBIde()
@@ -209,6 +209,9 @@ void DSBIde::make_toolbar()
 	m_act_showtree = m_bar->addAction(QIcon(":/icons/application_side_tree.png"), "Tree");
 	m_act_split = m_bar->addAction(QIcon(":/icons/application_tile_horizontal.png"), "Split");
 	m_bar->addAction(QIcon(":/icons/application_double.png"), "Undock");
+	m_bar->addSeparator();
+	m_bar->addAction(QIcon(":/icons/plugin_add.png"), "Load Plugin");
+	m_bar->addAction(QIcon(":/icons/plugin_delete.png"), "Unload Plugin");
 
 	m_act_showtree->setCheckable(true);
 	m_act_showtree->setChecked(true);
@@ -278,7 +281,7 @@ void DSBIde::hideSplash()
 	m_splash->hide();
 }
 
-void DSBIde::newView(const NID_t &d1, const NID_t &d2, const NID_t &nid)
+void DSBIde::newView(const NID_t &d1, const NID_t &d2, const NID_t &nid, int mode)
 {
 	unsigned int pat = dsb_pattern_what(&nid);
 
@@ -287,7 +290,7 @@ void DSBIde::newView(const NID_t &d1, const NID_t &d2, const NID_t &nid)
 	DSBView *nv = DSBView::createView(pat);
 	if (nv != 0)
 	{
-		nv->addHARC(d1,d2,nid);
+		nv->addHARC(d1,d2,nid,mode);
 
 		QMdiSubWindow *win = new QMdiSubWindow(this);
 		win->setWidget(nv);

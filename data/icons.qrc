@@ -59,5 +59,8 @@
 		<file>icons/application_side_tree.png</file>
 		<file>icons/computer.png</file>
 		<file>icons/page_paste.png</file>
+		<file>icons/dsb-script.png</file>
+		<file>icons/plugin_add.png</file>
+		<file>icons/plugin_delete.png</file>
 	</qresource>
 </RCC>
