@@ -1,7 +1,7 @@
 /*
- * displayview.h
+ * script.h
  *
- *  Created on: 17 Jun 2013
+ *  Created on: 3 Jul 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,40 +32,36 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef DISPLAYVIEW_H_
-#define DISPLAYVIEW_H_
+#ifndef SCRIPT_H_
+#define SCRIPT_H_
 
 #include "dsb/ide/view.h"
-#include <dsb/core/nid.h>
 
-class DisplayView : public DSBView
+class QTextEdit;
+class QToolBar;
+
+class ScriptView : public DSBView
 {
 	Q_OBJECT
 
 public:
-	DSBVIEW(DisplayView);
+	DSBVIEW(ScriptView);
 
-	DisplayView();
-	~DisplayView();
+	ScriptView();
+	~ScriptView();
 
 	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode);
 	void clearHARCs();
-	const char *title() { return "Display"; }
-
-	void paintEvent(QPaintEvent *event);
-
-	void drawElement(QPainter &painter, const NID_t *ele);
-	void drawLine(QPainter &painter, const NID_t *ele);
-	void drawText(QPainter &painter, const NID_t *ele);
-	void drawImage(QPainter &painter, const NID_t *ele);
-
-	const NID_t *getObject() { return &m_obj; }
+	const char *title() { return "Script"; }
 
 private:
-	int m_width;
-	int m_height;
-	NID_t m_obj;
+	QTextEdit *m_script;
+	QToolBar *m_bar;
+
+public slots:
+	void toolclick(QAction *);
 };
 
 
-#endif /* DISPLAYVIEW_H_ */
+
+#endif /* SCRIPT_H_ */

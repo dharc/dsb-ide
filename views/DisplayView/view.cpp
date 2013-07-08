@@ -40,11 +40,21 @@ either expressed or implied, of the FreeBSD Project.
 #include <dsb/patterns/pattern_types.h>
 #include <dsb/patterns/pattern.h>
 #include <dsb/algorithms/iterator.h>
+#include <dsb/core/agent.h>
 #include <QPainter>
 
 #include <cstdio>
+#include <iostream>
 
 #include "displayview.h"
+
+void display_agent(const NID_t *me, void *thi)
+{
+	DisplayView *disp = static_cast<DisplayView*>(thi);
+	dsb_dependencynznn(disp->getObject(),"changed",me,me);
+	std::cout << "PAINTING\n";
+	disp->repaint();
+}
 
 DisplayView::DisplayView()
  : DSBView()
@@ -72,7 +82,8 @@ void DisplayView::addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int 
 
 	setMinimumSize(m_width,m_height);
 
-	repaint();
+	//Need to add a C agent to the changed attribute.
+	dsb_agent_startx(display_agent,this);
 }
 
 void DisplayView::clearHARCs()

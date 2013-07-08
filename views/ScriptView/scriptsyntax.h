@@ -1,7 +1,7 @@
 /*
- * displayview.h
+ * asmsyntax.h
  *
- *  Created on: 17 Jun 2013
+ *  Created on: 31 May 2013
  *      Author: nick
 
 Copyright (c) 2013, dharc ltd.
@@ -32,40 +32,31 @@ of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
  */
 
-#ifndef DISPLAYVIEW_H_
-#define DISPLAYVIEW_H_
+#ifndef SCRIPTSYNTAX_H_
+#define SCRIPTSYNTAX_H_
 
-#include "dsb/ide/view.h"
-#include <dsb/core/nid.h>
+#include <QSyntaxHighlighter>
+#include <QListWidget>
 
-class DisplayView : public DSBView
+class ScriptSyntax : public QSyntaxHighlighter
 {
-	Q_OBJECT
-
 public:
-	DSBVIEW(DisplayView);
+	ScriptSyntax(QTextDocument *textEdit, QListWidget *kw=0);
+	~ScriptSyntax();
 
-	DisplayView();
-	~DisplayView();
+	void highlightBlock ( const QString & text );
 
-	void addHARC(const NID_t &t1, const NID_t &t2, const NID_t &h, int mode);
-	void clearHARCs();
-	const char *title() { return "Display"; }
-
-	void paintEvent(QPaintEvent *event);
-
-	void drawElement(QPainter &painter, const NID_t *ele);
-	void drawLine(QPainter &painter, const NID_t *ele);
-	void drawText(QPainter &painter, const NID_t *ele);
-	void drawImage(QPainter &painter, const NID_t *ele);
-
-	const NID_t *getObject() { return &m_obj; }
+	QTextCharFormat font_normal; //NID
+	QTextCharFormat font_comment;
+	QTextCharFormat font_key;
+	QTextCharFormat font_number;
+	QTextCharFormat font_char;
+	QTextCharFormat font_op;
+	QTextCharFormat font_var;
 
 private:
-	int m_width;
-	int m_height;
-	NID_t m_obj;
+	QListWidget *m_keylist;
 };
 
 
-#endif /* DISPLAYVIEW_H_ */
+#endif /* SCRIPTSYNTAX_H_ */
