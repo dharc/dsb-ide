@@ -165,7 +165,7 @@ DSBIde::DSBIde()
 	m_splash->show();
 
 	setWindowTitle("DSB Interactive Development Environment");
-	setWindowState(Qt::WindowMaximized);
+	//setWindowState(Qt::WindowMaximized);
 	//show();
 }
 
